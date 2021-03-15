@@ -1,7 +1,7 @@
-@file:Suppress("UnstableApiUsage", "LocalVariableName")
-
 plugins {
-    kotlin("jvm") version "1.4.30"
+    val kotlinVer = "1.4.30"
+    kotlin("jvm") version kotlinVer
+    kotlin("plugin.serialization") version kotlinVer
     id("com.gradle.plugin-publish") version "0.13.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
 }

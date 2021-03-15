@@ -15,8 +15,14 @@ dependencies {
     compileOnly(kotlin("gradle-plugin-api").toString()) {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib")
     }
+    compileOnly(localGroovy())
     compileOnly(kotlin("stdlib"))
     testApi(gradleTestKit())
+
+    api(project(":protocol"))
+
+    api("io.github.karlatemp:PublicationSign:1.1.0")
+    api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 }
 
 pluginBundle {
@@ -40,5 +46,6 @@ kotlin.target.compilations.all {
     kotlinOptions {
         apiVersion = "1.3"
         languageVersion = "1.4"
+        freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
     }
 }
