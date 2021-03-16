@@ -10,7 +10,7 @@ kotlin {
     sourceSets {
         all {
             dependencies {
-                api(project(":protocol"))
+                api(project(":maven-central-publish-protocol"))
             }
         }
     }

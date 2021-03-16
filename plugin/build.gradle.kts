@@ -1,6 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm")
     id("java-gradle-plugin")
+    `maven-publish`
     id("com.gradle.plugin-publish")
     id("com.github.johnrengelman.shadow")
 }
@@ -19,11 +22,17 @@ dependencies {
     compileOnly(kotlin("stdlib"))
     testApi(gradleTestKit())
 
-    api(project(":protocol"))
+    api(project(":maven-central-publish-protocol"))
 
     api("io.github.karlatemp:PublicationSign:1.1.0")
     api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 }
+
+tasks.getByName("shadowJar", ShadowJar::class) {
+    archiveClassifier.set("")
+}
+
+tasks.getByName("publishPlugins").dependsOn("shadowJar")
 
 pluginBundle {
     website = "https://github.com/Him188/maven-central-publish"
@@ -37,7 +46,7 @@ gradlePlugin {
             id = "net.mamoe.maven-central-publish"
             displayName = "Maven Central Publish"
             description = project.description
-            implementationClass = "net.mamoe.him188.maven.central.publish.MavenCentralPublishPlugin"
+            implementationClass = "net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin"
         }
     }
 }
