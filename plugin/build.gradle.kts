@@ -34,7 +34,7 @@ pluginBundle {
 gradlePlugin {
     plugins {
         create("MavenCentralPublish") {
-            id = "net.mamoe.him188.maven-central-publish"
+            id = "net.mamoe.maven-central-publish"
             displayName = "Maven Central Publish"
             description = project.description
             implementationClass = "net.mamoe.him188.maven.central.publish.MavenCentralPublishPlugin"
