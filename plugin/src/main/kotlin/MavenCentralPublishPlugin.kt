@@ -21,16 +21,6 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
         target.plugins.apply(PublicationSignPlugin::class.java)
 
         target.run {
-            extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
-                sign.setupWorkflow { workflow ->
-                    workflow.workingDir = buildDir.resolve("gpg").apply { mkdirs() }
-                    workflow.fastSetup(
-                        buildDir.relativeTo(projectDir).resolve("key.pub").path,
-                        buildDir.relativeTo(projectDir).resolve("key.pri").path,
-                    )
-                }
-            }
-
             afterEvaluate {
                 val ext = target.mcExt
                 val credentials = ext.credentials ?: kotlin.run {
@@ -43,6 +33,16 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                         packageGroup = (target.group ?: target.rootProject.group).toString()
                         username = credentials.sonatypeUsername
                         password = credentials.sonatypePassword
+                    }
+                }
+
+                extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
+                    sign.setupWorkflow { workflow ->
+                        workflow.workingDir = buildDir.resolve("gpg").apply { mkdirs() }
+                        workflow.fastSetup(
+                            buildDir.relativeTo(projectDir).resolve("key.pub").path,
+                            buildDir.relativeTo(projectDir).resolve("key.pri").path,
+                        )
                     }
                 }
 
@@ -84,21 +84,7 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                                 this.groupId = groupId
                                 this.artifactId = artifactId
                                 this.version = project.version.toString()
-                                pom { pom ->
-                                    pom.withXml {
-                                        it.asNode()
-                                    }
-                                    pom.name.set(project.name)
-                                    pom.description.set(project.description)
-                                    pom.url.set(ext.projectUrl)
-                                    pom.scm { scm ->
-                                        scm.url.set(ext.projectUrl)
-                                        scm.connection.set(ext.connection)
-                                    }
-                                    ext.pomConfigurators.forEach {
-                                        it.execute(pom)
-                                    }
-                                }
+                                setupPom(publication, project, ext)
                                 ext.publicationConfigurators.forEach {
                                     it.execute(this)
                                 }
@@ -106,13 +92,79 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
 
                         }
                     } else {
-                        // TODO: 2021/3/16 configure publication for mpp
-                        publications.configureEach { publication ->
-                            publication.run {
+                        publications.filterIsInstance<MavenPublication>().forEach { publication ->
+                            publication.artifact(javadocJar)
+                            setupPom(publication, project, ext)
+
+                            when (val type = publication.name) {
+                                "kotlinMultiplatform" -> {
+                                    publication.artifactId = project.name
+
+                                    publishPlatformArtifactsInRootModule(publications.getByName("jvm") as MavenPublication)
+                                }
+                                "common" -> {
+                                }
+                                else -> {
+                                    // "jvm", "native", "js"
+                                    publication.artifactId = "${project.name}-$type"
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun Project.publishPlatformArtifactsInRootModule(platformPublication: MavenPublication) {
+        lateinit var platformPomBuilder: XmlProvider
+        platformPublication.pom.withXml { platformPomBuilder = it }
+
+        extensions.findByType(PublishingExtension::class.java)?.publications?.getByName("kotlinMultiplatform")?.let { it as MavenPublication }?.run {
+            this.artifacts.removeIf {
+                it.classifier == null && it.extension == "jar"
+            }
+
+            platformPublication.artifacts.forEach {
+                artifact(it)
+            }
+
+            // replace pom
+            pom.withXml { xmlProvider ->
+                val pomStringBuilder = xmlProvider.asString()
+                pomStringBuilder.setLength(0)
+                platformPomBuilder.toString().lines().forEach { line ->
+                    if (!line.contains("<!--")) { // Remove the Gradle module metadata marker as it will be added anew
+                        pomStringBuilder.append(line.replace(platformPublication.artifactId, artifactId))
+                        pomStringBuilder.append("\n")
+                    }
+                }
+            }
+        }
+
+        tasks.matching { it.name == "generatePomFileForKotlinMultiplatformPublication" }.configureEach { task ->
+            task.dependsOn(tasks["generatePomFileFor${platformPublication.name.capitalize()}Publication"])
+        }
+    }
+
+    private fun setupPom(
+        mavenPublication: MavenPublication,
+        project: Project,
+        ext: MavenCentralPublishExtension
+    ) {
+        mavenPublication.pom { pom ->
+            pom.withXml {
+                it.asNode()
+            }
+            pom.name.set(project.project.name)
+            pom.description.set(project.project.description)
+            pom.url.set(ext.projectUrl)
+            pom.scm { scm ->
+                scm.url.set(ext.projectUrl)
+                scm.connection.set(ext.connection)
+            }
+            ext.pomConfigurators.forEach {
+                it.execute(pom)
             }
         }
     }
