@@ -23,7 +23,6 @@ kotlin {
             kotlinOptions {
                 apiVersion = "1.3"
                 languageVersion = "1.4"
-                freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
             }
         }
     }
