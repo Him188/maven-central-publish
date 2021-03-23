@@ -24,6 +24,17 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
 
         target.extensions.create(MavenCentralPublishExtension::class.java, "mavenCentralPublish", MavenCentralPublishExtension::class.java, target)
 
+        target.tasks.register("checkPublicationCredentials") { task ->
+            task.group = "publishing"
+            task.description = "Check publication credentials."
+            task.doLast {
+                val ext = it.project.mcExt
+                if (ext.credentials == null) {
+                    error("No Publication credentials were set.")
+                }
+            }
+        }
+
         target.run {
             afterEvaluate {
                 val ext = target.mcExt
