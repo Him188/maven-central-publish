@@ -1,8 +1,4 @@
-# maven-central-publish
-
-Configure publication to Maven Central repository for Gradle projects with minimal effort.
-
-## How to use this plugin in a local project
+# How to use this plugin in a local project
 
 - [I have used this plugin before](#i-have-used-this-plugin-before)
 - [I am new to publication](#i-am-new-to-publication)
@@ -30,7 +26,7 @@ This is a shorter version of how to configure publication for those who have rea
 If you publish your artifact (namely your project files) to [Maven Central repository](https://repo.maven.apache.org/maven2/), anyone can access your files directly,
 in Gradle by declaring `mavenCentral()` repository and in maven that is already done by default.
 
-Anyone can publish artifacts to the Maven Central repository (MC in short), however MC has strict rules.  
+Anyone can publish artifacts to the Maven Central repository (MC in short), however MC has strict rules.
 
 If you are a personal developer, you usually don't need to pay specific attention to these rule, just follow this guide and use this plugin.
 
@@ -189,3 +185,18 @@ mavenCentralPublish {
 ### 4. Finish
 
 Now you can execute the `publish` task to upload artifacts. If you want to use this plugin a second time, just read [I have used this plugin before](#i-have-used-this-plugin-before)
+
+## After uploading the artifacts
+
+When `publish` executed successfully, you need to do `close` and `release` on Sonatype <https://oss.sonatype.org/#stagingRepositories>.
+
+If a `close` has failed, it means this plugin has done something wrong. Please report to [issues](https://github.com/Him188/maven-central-publish/issues).
+
+If all succeed, your repository will be in Maven Central and can be accessed publicly. You can check on <https://mvnrepository.com/>.
+
+### Automation
+
+`close` and `release` can be done automatically by another plugin <https://github.com/bmuschko/gradle-nexus-plugin>.  
+`maven-central-publish` has already configured that for you. You can execute task `closeAndReleaseRepository` in root project.
+
+However, this can only handle single publication. If you publish multiple modules at one time, you can only close and release on the Sonatype website.
