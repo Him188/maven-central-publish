@@ -10,7 +10,6 @@ import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
 import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
 import platform.posix.*
-import platform.windows._mm_pause
 
 fun main() = runPrintErrorMessage {
     println("Working dir: ${getCurrentDir() ?: "unknown"}")
@@ -52,8 +51,6 @@ fun main() = runPrintErrorMessage {
     println()
     writeFile("credentials.txt", string)
     println("Saved as credentials.txt")
-
-    _mm_pause()
 }
 
 private inline fun runPrintErrorMessage(block: () -> Unit) {
