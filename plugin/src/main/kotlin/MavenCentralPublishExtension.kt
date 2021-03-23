@@ -14,6 +14,8 @@ import org.gradle.api.publish.maven.MavenPublication
 /**
  * The extension for Maven Central publication.
  *
+ * For more information, read [https://github.com/Him188/maven-central-publish](https://github.com/Him188/maven-central-publish)
+ *
  * @see pomConfigurators
  * @see publicationConfigurators
  */
