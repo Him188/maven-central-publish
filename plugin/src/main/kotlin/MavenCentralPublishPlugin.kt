@@ -43,19 +43,20 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                 project.logger.info("Writing public key len=${credentials.gpgPublicKey.length} to \$buildDir/keys/key.pub.")
                 project.logger.info("Writing private key len=${credentials.gpgPrivateKey.length} to \$buildDir/keys/key.pri.")
 
-                buildDir.resolve("keys")
-                    .apply { mkdirs() }
-                    .run {
-                        resolve("key.pub").writeText(credentials.gpgPublicKey)
-                        resolve("key.pri").writeText(credentials.gpgPrivateKey)
-                    }
+                val keysDir = buildDir.resolve("keys").apply { mkdirs() }
+
+                keysDir.run {
+                    resolve("key.pub").writeText(credentials.gpgPublicKey)
+                    resolve("key.pri").writeText(credentials.gpgPrivateKey)
+                }
 
                 extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
                     sign.setupWorkflow { workflow ->
-                        workflow.workingDir = buildDir.resolve("keys").apply { mkdirs() }
+                        workflow.workingDir = keysDir
+                        workflow.homedir = keysDir.absolutePath
                         workflow.fastSetup(
-                            buildDir.relativeTo(projectDir).resolve("key.pub").path,
-                            buildDir.relativeTo(projectDir).resolve("key.pri").path,
+                            keysDir.resolve("key.pub").absolutePath,
+                            keysDir.resolve("key.pri").absolutePath,
                         )
                     }
                 }
