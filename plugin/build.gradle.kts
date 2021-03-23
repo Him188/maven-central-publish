@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
     id("java-gradle-plugin")
     `maven-publish`
     id("com.gradle.plugin-publish")
@@ -12,17 +13,30 @@ kotlin {
     explicitApi()
 }
 
+sourceSets.main {
+    java {
+        srcDir(project(":maven-central-publish-protocol").projectDir.resolve("src/commonMain/kotlin"))
+        // so that no need to publish :maven-central-publish-protocol to maven central.
+    }
+}
+
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
     compileOnly(kotlin("gradle-plugin-api").toString()) {
-        exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+        isTransitive = false
+    }
+    compileOnly(kotlin("gradle-plugin").toString()) {
+        isTransitive = false
     }
     compileOnly(localGroovy())
     compileOnly(kotlin("stdlib"))
     testApi(gradleTestKit())
 
-    api(project(":maven-central-publish-protocol"))
+    //api(project(":maven-central-publish-protocol"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
 
     api("io.github.karlatemp:PublicationSign:1.1.0")
     api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")

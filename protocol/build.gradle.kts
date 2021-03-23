@@ -13,7 +13,7 @@ kotlin {
         commonMain {
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-serialization-core:${extra.get("serialization")}")
-                api("org.jetbrains.kotlinx:kotlinx-serialization-json:${extra.get("serialization")}")
+                api("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${extra.get("serialization")}")
             }
         }
     }

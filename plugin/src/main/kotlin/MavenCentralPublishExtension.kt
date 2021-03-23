@@ -2,6 +2,8 @@
 
 package net.mamoe.him188.maven.central.publish.gradle
 
+import kotlinx.serialization.decodeFromHexString
+import kotlinx.serialization.protobuf.ProtoBuf
 import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -94,6 +96,12 @@ public open class MavenCentralPublishExtension(
      */
     public var addProjectComponents: Boolean = true
 
+    /**
+     * `true` to publish jvm platform artifacts also in root module.
+     *
+     * This enables Kotlin Multiplatform Projects to be resolved by consumers who has no access to Gradle Metadata (e.g. Maven users).
+     */
+    public var publishPlatformArtifactsInRootModule: Boolean = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Quick configurator
@@ -156,13 +164,13 @@ public open class MavenCentralPublishExtension(
         organizationUrl: String? = null,
     ) {
         developer {
-            it.name.set(name)
-            it.email.set(email)
             it.id.set(id)
-            it.url.set(url)
-            it.roles.set(roles?.ifEmpty { null }?.split(','))
-            it.organization.set(organization)
-            it.organizationUrl.set(organizationUrl)
+            it.name.set(name)
+            if (!email.isNullOrBlank()) it.email.set(email)
+            if (!url.isNullOrBlank()) it.url.set(url)
+            if (!roles.isNullOrBlank()) it.roles.set(roles.split(','))
+            if (!organization.isNullOrBlank()) it.organization.set(organization)
+            if (!organizationUrl.isNullOrBlank()) it.organizationUrl.set(organizationUrl)
         }
     }
 
@@ -274,7 +282,8 @@ public open class MavenCentralPublishExtension(
             ?: find("publication.credentials")
             ?: return@runCatching null
 
-        PublicationCredentials.loadFrom(info.toString())
+        @Suppress("EXPERIMENTAL_API_USAGE")
+        ProtoBuf.decodeFromHexString(PublicationCredentials.serializer(), info.toString())
     }.getOrNull()
 
 }

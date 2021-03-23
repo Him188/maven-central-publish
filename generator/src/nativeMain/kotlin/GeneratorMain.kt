@@ -1,12 +1,16 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package net.mamoe.him188.maven.central.publish.generator
 
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToHexString
+import kotlinx.serialization.protobuf.ProtoBuf
 import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
 import platform.posix.*
+import platform.windows._mm_pause
 
 fun main() = runPrintErrorMessage {
     println("Working dir: ${getCurrentDir() ?: "unknown"}")
@@ -38,14 +42,18 @@ fun main() = runPrintErrorMessage {
         sonatypePassword = sonatypePassword,
     )
 
-    val format = Json {
-        prettyPrint = true
-    }
+    val format = ProtoBuf
 
-    val string = format.encodeToString(PublicationCredentials.serializer(), data)
-    writeFile("credentials.json", string)
+    val string = format.encodeToHexString(PublicationCredentials.serializer(), data)
 
-    println("credentials.json Exported.")
+    println("Your credentials is:")
+    println()
+    println(string)
+    println()
+    writeFile("credentials.txt", string)
+    println("Saved as credentials.txt")
+
+    _mm_pause()
 }
 
 private inline fun runPrintErrorMessage(block: () -> Unit) {

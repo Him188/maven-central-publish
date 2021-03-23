@@ -12,6 +12,8 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 
 public class MavenCentralPublishPlugin : Plugin<Project> {
@@ -19,6 +21,8 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
         target.rootProject.plugins.apply(NexusStagingPlugin::class.java)
         target.plugins.apply("maven-publish")
         target.plugins.apply(PublicationSignPlugin::class.java)
+
+        target.extensions.create(MavenCentralPublishExtension::class.java, "mavenCentralPublish", MavenCentralPublishExtension::class.java, target)
 
         target.run {
             afterEvaluate {
@@ -28,7 +32,7 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                     return@afterEvaluate
                 }
 
-                extensions.configure(NexusStagingExtension::class.java) { nexus ->
+                rootProject.extensions.configure(NexusStagingExtension::class.java) { nexus ->
                     with(nexus) {
                         packageGroup = (target.group ?: target.rootProject.group).toString()
                         username = credentials.sonatypeUsername
@@ -36,15 +40,8 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                     }
                 }
 
-                extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
-                    sign.setupWorkflow { workflow ->
-                        workflow.workingDir = buildDir.resolve("gpg").apply { mkdirs() }
-                        workflow.fastSetup(
-                            buildDir.relativeTo(projectDir).resolve("key.pub").path,
-                            buildDir.relativeTo(projectDir).resolve("key.pri").path,
-                        )
-                    }
-                }
+                project.logger.info("Writing public key len=${credentials.gpgPublicKey.length} to \$buildDir/keys/key.pub.")
+                project.logger.info("Writing private key len=${credentials.gpgPrivateKey.length} to \$buildDir/keys/key.pri.")
 
                 buildDir.resolve("keys")
                     .apply { mkdirs() }
@@ -53,10 +50,23 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                         resolve("key.pri").writeText(credentials.gpgPrivateKey)
                     }
 
+                extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
+                    sign.setupWorkflow { workflow ->
+                        workflow.workingDir = buildDir.resolve("keys").apply { mkdirs() }
+                        workflow.fastSetup(
+                            buildDir.relativeTo(projectDir).resolve("key.pub").path,
+                            buildDir.relativeTo(projectDir).resolve("key.pri").path,
+                        )
+                    }
+                }
+
                 val sourcesJar = tasks.getOrRegister("sourcesJar", Jar::class.java) {
                     @Suppress("DEPRECATION")
                     classifier = "sources"
-                    from(project.extensions.getByName<org.gradle.api.tasks.SourceSetContainer>("sourceSets")["main"].allSource)
+                    val sourceSets = project.extensions.getByName<org.gradle.api.tasks.SourceSetContainer>("sourceSets").matching { it.name.endsWith("main", ignoreCase = true) }
+                    for (sourceSet in sourceSets) {
+                        from(sourceSet.allSource)
+                    }
                 }
 
                 val javadocJar = tasks.getOrRegister("javadocJar", Jar::class.java) {
@@ -99,14 +109,22 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                             when (val type = publication.name) {
                                 "kotlinMultiplatform" -> {
                                     publication.artifactId = project.name
-
-                                    publishPlatformArtifactsInRootModule(publications.getByName("jvm") as MavenPublication)
                                 }
                                 "common" -> {
                                 }
                                 else -> {
                                     // "jvm", "native", "js"
                                     publication.artifactId = "${project.name}-$type"
+                                }
+                            }
+                        }
+                        if (ext.publishPlatformArtifactsInRootModule) {
+                            val jvmTarget =
+                                project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.targets?.find { it.publishable && it.platformType == KotlinPlatformType.jvm }
+                            if (jvmTarget != null) {
+                                val publication = publications.filterIsInstance<MavenPublication>().find { it.name == jvmTarget.name }
+                                if (publication != null) {
+                                    publishPlatformArtifactsInRootModule(publication)
                                 }
                             }
                         }
@@ -157,7 +175,10 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                 it.asNode()
             }
             pom.name.set(project.project.name)
-            pom.description.set(project.project.description)
+            pom.description.set(project.project.description ?: project.rootProject.description ?: kotlin.run {
+                project.logger.warn("[MavenCentralPublish] Project description not found for project '${project.path}'. Please set by `project.description`.")
+                "No description provided."
+            })
             pom.url.set(ext.projectUrl)
             pom.scm { scm ->
                 scm.url.set(ext.projectUrl)
