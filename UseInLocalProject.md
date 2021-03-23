@@ -6,17 +6,16 @@
 
 ## I have used this plugin before
 
-This is a shorter version of how to configure publication for those who have read the previous chapters before. If not, please do so.
-
 1. Apply Gradle plugin `net.mamoe.maven-central-publish`, version `0.1.12`
-2. Configure `mavenCentralPublish` like:
+2. Configure `mavenCentralPublish`  
+   Raed `MavenCentralPublishExtension.pomConfigurators` to see required information, or configure a GitHub project like:
    ```kotlin
    mavenCentralPublish {
        singleDevGithubProject("Him188", "yamlkt")
        licenseFromGitHubProject("Apache-2.0", "master")
    }
    ```
-3. Set Gradle property, JVM property, JVM or system environment variable named `publication.credentials` or `PUBLICATION_CREDENTIALS`. If you have already done it globally, skip that.
+3. Set ***credentials:*** set any of Gradle property, JVM property, JVM or system environment variable named `publication.credentials` or `PUBLICATION_CREDENTIALS`
 4. Finish
 
 ----
