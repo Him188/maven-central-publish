@@ -8,7 +8,7 @@
 
 1. Apply Gradle plugin `net.mamoe.maven-central-publish`, version `0.1.12`
 2. Configure `mavenCentralPublish`  
-   Raed `MavenCentralPublishExtension.pomConfigurators` to see required information, or configure a GitHub project like:
+   Raed `MavenCentralPublishExtension.pomConfigurators` for required information, **or** simply configure a GitHub project like:
    ```kotlin
    mavenCentralPublish {
        singleDevGithubProject("Him188", "yamlkt")
