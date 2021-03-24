@@ -65,9 +65,11 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                 project.logger.info("Writing public key len=${credentials.gpgPublicKey.length} to \$buildDir/keys/key.pub.")
                 project.logger.info("Writing private key len=${credentials.gpgPrivateKey.length} to \$buildDir/keys/key.pri.")
 
-                val keysDir = buildDir.resolve("keys").apply { mkdirs() }
+                val keysDir = buildDir.resolve("keys")
 
                 keysDir.run {
+                    deleteRecursively() // clear caches
+                    mkdirs()
                     resolve("key.pub").writeText(credentials.gpgPublicKey)
                     resolve("key.pri").writeText(credentials.gpgPrivateKey)
                 }
