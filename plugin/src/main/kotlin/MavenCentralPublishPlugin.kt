@@ -17,6 +17,13 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 
 public class MavenCentralPublishPlugin : Plugin<Project> {
+    private companion object {
+        const val GPG_PUBLIC_KEY_BEGIN = "-----BEGIN PGP PUBLIC KEY BLOCK-----"
+        const val GPG_PUBLIC_KEY_END = "-----END PGP PUBLIC KEY BLOCK-----"
+        const val GPG_PRIVATE_KEY_BEGIN = "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+        const val GPG_PRIVATE_KEY_END = "-----END PGP PRIVATE KEY BLOCK-----"
+    }
+
     override fun apply(target: Project) {
         target.rootProject.plugins.apply(NexusStagingPlugin::class.java)
         target.plugins.apply("maven-publish")
@@ -29,9 +36,13 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
             task.description = "Check publication credentials."
             task.doLast {
                 val ext = it.project.mcExt
-                if (ext.credentials == null) {
-                    error("No Publication credentials were set.")
-                }
+                val credentials = ext.credentials ?: error("No Publication credentials were set.")
+
+                check(credentials.gpgPublicKey.trimStart().startsWith(GPG_PUBLIC_KEY_BEGIN)) { "Invalid GPG public key" }
+                check(credentials.gpgPublicKey.trimEnd().startsWith(GPG_PUBLIC_KEY_END)) { "Invalid GPG public key" }
+
+                check(credentials.gpgPrivateKey.trimStart().startsWith(GPG_PRIVATE_KEY_BEGIN)) { "Invalid GPG private key" }
+                check(credentials.gpgPrivateKey.trimEnd().startsWith(GPG_PRIVATE_KEY_END)) { "Invalid GPG private key" }
             }
         }
 
