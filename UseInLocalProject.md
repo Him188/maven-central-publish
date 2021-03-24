@@ -44,10 +44,10 @@ Follow steps 1 to 7 described by [How to Publish Your Artifacts to Maven Central
 2. On the upper right corner, click your username
 3. Click `Profile`
 4. Click `Summary` and choose `User Token`
-5. `Access User Token
-6. Note down the ***`username`*** and ***`password`***, this is your Sonatype User Token.
+5. `Access User Token`
+6. Note down the ***`username`*** and ***`password`***, this will be your Sonatype User Token.
 
-You also use this pair of username and password to log into your account, so it is just like another way to access your Sonatype account, but you can reset the User Token.
+You can also use this pair of username and password to log into your account, so it is just like another way to access your Sonatype account, but you can reset the User Token so it is more safe.
 
 ### Generate key pair
 
