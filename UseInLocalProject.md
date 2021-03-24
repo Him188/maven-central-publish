@@ -62,7 +62,7 @@ You can also use this pair of username and password to log into your account, so
 
 2. Upload the key pair to a public keyserver
 
-   <http://keyserver.ubuntu.com:11371/>
+   <http://pool.sks-keyservers.net:11371/>
 
    Open `keys.gpg.pub` as a text file, upload its content to the website.
 
