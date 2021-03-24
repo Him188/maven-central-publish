@@ -32,7 +32,7 @@ If you are a personal developer, you usually don't need to pay specific attentio
 ### Register and activate Sonatype account
 
 [Karlatemp/PublicationSign]: https://raw.githubusercontent.com/Karlatemp/PublicationSign
-[@Karlatemp]: https://raw.githubusercontent.com/Karlatemp/
+[@Karlatemp]: https://github.com/Karlatemp/
 
 Follow steps 1 to 7 described by [How to Publish Your Artifacts to Maven Central](https://dzone.com/articles/publish-your-artifacts-to-maven-central). (Thanks to the original author)
 
