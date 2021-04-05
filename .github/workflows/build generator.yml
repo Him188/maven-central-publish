@@ -26,6 +26,9 @@ jobs:
           java-version: 8
       - run: chmod +x gradlew
       - run: ./gradlew build --scan
+        if: "${{ matrix.os  == 'macos-latest' }}"
+      - run: ./gradlew assemble --scan
+        if: "${{ matrix.os  == 'windows-latest' }}"
       - uses: actions/upload-artifact@v2
         if: "${{ matrix.os  == 'macos-latest' }}"
         with:
