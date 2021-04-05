@@ -83,7 +83,6 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
                     sign.setupWorkflow { workflow ->
                         workflow.workingDir = keysDir
-                        workflow.homedir = keysDir.absolutePath
                         workflow.fastSetup(
                             keysDir.resolve("key.pub").absolutePath,
                             keysDir.resolve("key.pri").absolutePath,
