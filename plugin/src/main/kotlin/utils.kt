@@ -28,7 +28,7 @@ internal class LazyDefaultProperty<in T, R>(
         val current = this.value.get()
         @Suppress("UNCHECKED_CAST")
         if (current === NULL) {
-            this.value.compareAndSet(null, default)
+            this.value.compareAndSet(NULL, default)
         } else {
             return current as R
         }
