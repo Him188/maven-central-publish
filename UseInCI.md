@@ -6,7 +6,7 @@ Just like in local projects, ensure GnuPG installed and ***credentials*** is set
 
 ## GitHub Actions workflow example
 
-1. Add ***credentials*** to GitHub project secrets on `$projectUrl/settings/secrets/actions` or GitHub organization secrets on `$organizationUrl/settings/secrets/actions`
+1. Add ***credentials*** to GitHub project secrets with name `PUBLICATION_CREDENTAILS` on `$projectUrl/settings/secrets/actions` or GitHub organization secrets on `$organizationUrl/settings/secrets/actions`
 2. Add this file to `.github/workflows/publish.yml`
 
 ```yaml
@@ -31,7 +31,7 @@ jobs:
       - run: ./gradlew build
       - run: ./gradlew checkPublicationCredentials
         env: 
-          PUBLICATION_CREDENTIALS: ${{ secrets.BINTRAY_USER }}  
+          PUBLICATION_CREDENTIALS: ${{ secrets.PUBLICATION_CREDENTAILS }}  
       - run: ./gradlew publish
 ```
 
