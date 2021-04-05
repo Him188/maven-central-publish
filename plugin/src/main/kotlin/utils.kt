@@ -27,7 +27,7 @@ internal class LazyDefaultProperty<in T, R>(
     override fun getValue(thisRef: T, property: KProperty<*>): R {
         val current = this.value.get()
         @Suppress("UNCHECKED_CAST")
-        if (current == null) {
+        if (current === NULL) {
             this.value.compareAndSet(null, default)
         } else {
             return current as R
