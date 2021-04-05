@@ -14,19 +14,20 @@ import platform.posix.*
 fun main() = runPrintErrorMessage {
     println("Working dir: ${getCurrentDir() ?: "unknown"}")
 
-    val (sonatypeUsername, sonatypePassword) =
+    val (sonatypeUsername, sonatypePassword, packageGroup) =
         (readFile("sonatype.txt")
             ?: run {
                 writeFile("sonatype.txt", "\n")
-                error("Please edit sonatype.txt in such a way that set your Sonatype username at the first line, and password at the second.")
+                error("Please edit sonatype.txt in such a way that set your Sonatype username at the first line, password at the second, and package group at the third.")
             })
-            .apply { check(contains('\n')) { "Bad sonatype.txt. Please set your Sonatype username at the first line, and password at the second." } }
+            .apply { check(count { it == '\n' } >= 2) { "Bad sonatype.txt. Please set your Sonatype username at the first line, password at the second, and package group at the third." } }
             .split('\n')
             .map { it.trim() }
 
 
     println("Sonatype username: $sonatypeUsername")
     println("Sonatype password: $sonatypePassword")
+    println("Sonatype package group: $packageGroup")
 
     val gpgPublic = readFileOrFail("keys.gpg.pub")
     println("GPG public key length is ${gpgPublic.length}")
@@ -39,6 +40,7 @@ fun main() = runPrintErrorMessage {
         pgpPrivateKey = gpgPrivate,
         sonatypeUsername = sonatypeUsername,
         sonatypePassword = sonatypePassword,
+        packageGroup = packageGroup,
     )
 
     val format = ProtoBuf
@@ -60,6 +62,7 @@ private inline fun runPrintErrorMessage(block: () -> Unit) {
             println(msg)
         else e.printStackTrace()
     }
+    getchar()
 }
 
 private fun readFileOrFail(path: String): String = readFile(path) ?: error("File $path does not exist")
