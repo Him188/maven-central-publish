@@ -11,6 +11,15 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
 import platform.posix.*
 
+private val SONATYPE_TXT_TIPS = """Please edit sonatype.txt following the rules:
+                    |First line: Sonatype username
+                    |Second line: Sonatype password
+                    |Third line: package group (optional)
+                    |
+                    |If you set package group, this will be the default when configuring projects. If you use only one group name with this account, you can set it for convenience.
+                    |If not set, each time configuring project you need to set by `packageGroup = `
+                """.trimMargin()
+
 fun main() = runPrintErrorMessage {
     println("Working dir: ${getCurrentDir() ?: "unknown"}")
 
@@ -18,11 +27,15 @@ fun main() = runPrintErrorMessage {
         (readFile("sonatype.txt")
             ?: run {
                 writeFile("sonatype.txt", "\n")
-                error("Please edit sonatype.txt in such a way that set your Sonatype username at the first line, password at the second, and package group at the third.")
+                error(SONATYPE_TXT_TIPS)
             })
-            .apply { check(count { it == '\n' } >= 2) { "Bad sonatype.txt. Please set your Sonatype username at the first line, password at the second, and package group at the third." } }
+            .apply { check(count { it == '\n' } >= 1) { "Bad sonatype.txt. $SONATYPE_TXT_TIPS" } }
             .split('\n')
             .map { it.trim() }
+            .let {
+                if (it.size > 2) it
+                else it + ""
+            }
 
 
     println("Sonatype username: $sonatypeUsername")
@@ -53,6 +66,8 @@ fun main() = runPrintErrorMessage {
     println()
     writeFile("credentials.txt", string)
     println("Saved as credentials.txt")
+    println()
+    println("This is not encrypted. Keep it safe.")
 }
 
 private inline fun runPrintErrorMessage(block: () -> Unit) {

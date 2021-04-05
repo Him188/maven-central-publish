@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPomDeveloper
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.kotlin.dsl.provideDelegate
 
 /**
  * The extension for Maven Central publication.
@@ -20,6 +21,21 @@ import org.gradle.api.publish.maven.MavenPublication
 open class MavenCentralPublishExtension(
     project: Project,
 ) {
+    ///////////////////////////////////////////////////////////////////////////
+    // Credentials
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Sonatype accounts and GPG keys.
+     *
+     * Will find from project property `PUBLICATION_CREDENTIALS`, `publication.credentials` or from [System.getProperty] and [System.getenv]
+     */
+    var credentials: PublicationCredentials? = kotlin.runCatching { Credentials.findCredentials(project) }.getOrNull()
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Project
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
      * Project main URL. Example: `https://github.com/him188/maven-central-publish`
      */
@@ -29,6 +45,16 @@ open class MavenCentralPublishExtension(
      * Connection URL. Example: `scm:git:git://github.com/him188/maven-central-publish.git`
      */
     var connection: String = ""
+
+    /**
+     * Package group when closing repository on [Sonatype OSS](https://oss.sonatype.org/#stagingRepositories).
+     *
+     * Retries from [PublicationCredentials.packageGroup] if you have set it when generating the credentials,
+     * otherwise, get from [Project.getGroup] from current project or root project.
+     *
+     * Task `closeAndReleaseRepository` depends on this value.
+     */
+    var packageGroup: String by lazyDefault { credentials?.packageGroup ?: (project.group ?: project.rootProject.group).toString() }
 
     /**
      * [MavenPom] (`pom.xml`) configurators.
@@ -261,15 +287,4 @@ open class MavenCentralPublishExtension(
         license("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
     }
 
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Credentials
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Sonatype accounts and GPG keys.
-     *
-     * Will find from project property `PUBLICATION_CREDENTIALS`, `publication.credentials` or from [System.getProperty] and [System.getenv]
-     */
-    var credentials: PublicationCredentials? = kotlin.runCatching { Credentials.findCredentials(project) }.getOrNull()
 }

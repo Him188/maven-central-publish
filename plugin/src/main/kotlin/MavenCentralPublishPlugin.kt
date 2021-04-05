@@ -62,9 +62,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
 
                 rootProject.extensions.configure(NexusStagingExtension::class.java) { nexus ->
                     with(nexus) {
-                        packageGroup = (target.group ?: target.rootProject.group).toString()
-                        username = credentials.sonatypeUsername
-                        password = credentials.sonatypePassword
+                        if (packageGroup == null) packageGroup = ext.packageGroup
+                        if (username == null) username = credentials.sonatypeUsername
+                        if (password == null) password = credentials.sonatypePassword
                     }
                 }
 
