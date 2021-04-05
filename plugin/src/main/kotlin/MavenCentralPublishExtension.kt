@@ -138,10 +138,13 @@ open class MavenCentralPublishExtension(
      *
      * [user] and [repositoryName] are A and B in `https://github.com/A/B` respectively.
      *
-     * Please configure at least one [developer] after invoking this function.
+     * After this, you need to add at least one [developer] and at least one [license].
      *
      * @param user the name of the organization or the user that this repository belongs to
      * @param repositoryName the name of the repository
+     *
+     * @see developer
+     * @see license
      */
     fun githubProject(
         user: String,
@@ -153,14 +156,19 @@ open class MavenCentralPublishExtension(
     }
 
     /**
-     * Configure publication for a GitHub project who has , setting all the information required.
+     * Configure publication for a GitHub project with one developer, setting all the information required.
      *
      * [user] and [repositoryName] are A and B in `https://github.com/A/B` respectively.
      *
-     * This function configures all the required information so no further configurations needed.
+     * After this, you need to add at least one [license].
+     *
+     * More developers can be added through [developer].
      *
      * @param user the name of the organization or the user that this repository belongs to
      * @param repositoryName the name of the repository
+     *
+     * @see developer
+     * @see license
      */
     @JvmOverloads
     fun singleDevGithubProject(
@@ -177,7 +185,9 @@ open class MavenCentralPublishExtension(
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Add a developer.
+     * Add a developer. [id] is required and must be unique.
+     *
+     * @see developer
      */
     @JvmOverloads
     fun developer(
@@ -201,7 +211,8 @@ open class MavenCentralPublishExtension(
     }
 
     /**
-     * Add a developer
+     * Add a developer. [MavenPomDeveloper.getId] and [MavenPomDeveloper.getName] are required.
+     * @see developer
      */
     fun developer(action: Action<MavenPomDeveloper>) {
         pomConfigurators.add {
@@ -219,7 +230,11 @@ open class MavenCentralPublishExtension(
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Adds a license
+     * Adds a license.
+     *
+     * If the project is hosted on GitHub, [licenseFromGitHubProject] can be used for convenience.
+     *
+     * [licenseAGplV3], [licenseMit], etc. methods are also available.
      */
     fun license(
         name: String,
@@ -237,7 +252,9 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using the license from your GitHub project.
-     * Please ensure you used [githubProject] or [singleDevGithubProject], or set [projectUrl] to your project url before this function.
+     *
+     * Please ensure your [projectUrl] refers to a valid GitHub project. This is also done by using [githubProject] or [singleDevGithubProject], or set [projectUrl] to your project url before this function.
+     * @see license
      */
     @JvmOverloads
     fun licenseFromGitHubProject(
@@ -254,6 +271,7 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using GNU General Public License, version 3
+     * @see license
      */
     fun licenseGplV3() {
         license("GNU GPLv3", "https://www.gnu.org/licenses/gpl-3.0.en.html")
@@ -261,6 +279,7 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using GNU General Public License, version 2
+     * @see license
      */
     fun licenseGplV2() {
         license("GNU GPLv2", "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html")
@@ -268,6 +287,7 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using GNU Affero General Public License, version 3
+     * @see license
      */
     fun licenseAGplV3() {
         license("GNU AGPLv3", "https://www.gnu.org/licenses/agpl-3.0.en.html")
@@ -275,6 +295,7 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using MIT license
+     * @see license
      */
     fun licenseMit() {
         license("MIT", "https://opensource.org/licenses/MIT")
@@ -282,6 +303,7 @@ open class MavenCentralPublishExtension(
 
     /**
      * Configures using Apache License, version 2.0
+     * @see license
      */
     fun licenseApacheV2() {
         license("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
