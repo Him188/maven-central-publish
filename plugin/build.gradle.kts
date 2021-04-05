@@ -45,12 +45,13 @@ dependencies {
     api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 
 
-    testApi(gradleTestKit())
     testApi(kotlin("test-junit5"))
     testApi("org.junit.jupiter:junit-jupiter-api:${rootProject.extra.get("junit")}")
     testApi("org.junit.jupiter:junit-jupiter-params:${rootProject.extra.get("junit")}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
     testApi("org.spockframework:spock-core:1.3-groovy-2.5")
+    testImplementation(kotlin("gradle-plugin"))
+    testImplementation(gradleTestKit())
 }
 
 tasks.withType(Test::class) {
