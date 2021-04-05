@@ -4,19 +4,23 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("java-gradle-plugin")
+    groovy
     `maven-publish`
     id("com.gradle.plugin-publish")
     id("com.github.johnrengelman.shadow")
-}
-
-kotlin {
-    explicitApi()
 }
 
 sourceSets.main {
     java {
         srcDir(project(":maven-central-publish-protocol").projectDir.resolve("src/commonMain/kotlin"))
         // so that no need to publish :maven-central-publish-protocol to maven central.
+    }
+}
+
+kotlin {
+    sourceSets.all {
+        languageSettings.progressiveMode = true
+        languageSettings.useExperimentalAnnotation("kotlin.OptIn")
     }
 }
 
@@ -31,7 +35,6 @@ dependencies {
     }
     compileOnly(localGroovy())
     compileOnly(kotlin("stdlib"))
-    testApi(gradleTestKit())
 
     //api(project(":maven-central-publish-protocol"))
 
@@ -40,6 +43,18 @@ dependencies {
 
     api("io.github.karlatemp:PublicationSign:1.1.0")
     api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
+
+
+    testApi(gradleTestKit())
+    testApi(kotlin("test-junit5"))
+    testApi("org.junit.jupiter:junit-jupiter-api:${rootProject.extra.get("junit")}")
+    testApi("org.junit.jupiter:junit-jupiter-params:${rootProject.extra.get("junit")}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
+    testApi("org.spockframework:spock-core:1.3-groovy-2.5")
+}
+
+tasks.withType(Test::class) {
+    useJUnitPlatform()
 }
 
 tasks.getByName("shadowJar", ShadowJar::class) {
@@ -55,6 +70,7 @@ pluginBundle {
 }
 
 gradlePlugin {
+    testSourceSets(sourceSets.test.get())
     plugins {
         create("MavenCentralPublish") {
             id = "net.mamoe.maven-central-publish"
@@ -70,6 +86,7 @@ kotlin.target.compilations.all {
         apiVersion = "1.3"
         languageVersion = "1.4"
         freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
+        freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
         jvmTarget = "1.8"
     }
 }

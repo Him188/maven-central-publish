@@ -2,8 +2,6 @@
 
 package net.mamoe.him188.maven.central.publish.gradle
 
-import kotlinx.serialization.decodeFromHexString
-import kotlinx.serialization.protobuf.ProtoBuf
 import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -19,18 +17,18 @@ import org.gradle.api.publish.maven.MavenPublication
  * @see pomConfigurators
  * @see publicationConfigurators
  */
-public open class MavenCentralPublishExtension(
+open class MavenCentralPublishExtension(
     project: Project,
 ) {
     /**
      * Project main URL. Example: `https://github.com/him188/maven-central-publish`
      */
-    public lateinit var projectUrl: String
+    var projectUrl: String = ""
 
     /**
      * Connection URL. Example: `scm:git:git://github.com/him188/maven-central-publish.git`
      */
-    public lateinit var connection: String
+    var connection: String = ""
 
     /**
      * [MavenPom] (`pom.xml`) configurators.
@@ -46,12 +44,12 @@ public open class MavenCentralPublishExtension(
      *
      * Therefore, please ensure that you set
      */
-    public val pomConfigurators: MutableList<Action<MavenPom>> = mutableListOf()
+    val pomConfigurators: MutableList<Action<MavenPom>> = mutableListOf()
 
     /**
      * Adds a configurator to [pomConfigurators]
      */
-    public fun pom(action: Action<MavenPom>) {
+    fun pom(action: Action<MavenPom>) {
         pomConfigurators.add(action)
     }
 
@@ -71,7 +69,7 @@ public open class MavenCentralPublishExtension(
      *
      * If you applied shadow-plugin (`com.github.johnrengelman.shadow`), there will be another artifact named `project-name-all.jar`.
      *
-     * Additionally, each file is signed with your [PublicationCredentials.gpgPrivateKey] in [credentials].
+     * Additionally, each file is signed with your [PublicationCredentials.pgpPrivateKey] in [credentials].
      *
      *
      * Each configurator in [publicationConfigurators] will be executed to the *publication* after the invocation of the above configuration,
@@ -79,12 +77,12 @@ public open class MavenCentralPublishExtension(
      * You can add more artifacts via [MavenPublication.from] or [MavenPublication.artifact],
      * but removing artifacts is not supported as all the ones preconfigured for you are required by the Maven Central validator.
      */
-    public val publicationConfigurators: MutableList<Action<MavenPublication>> = mutableListOf()
+    val publicationConfigurators: MutableList<Action<MavenPublication>> = mutableListOf()
 
     /**
      * Adds a configurator to [publicationConfigurators]
      */
-    public fun publication(action: Action<MavenPublication>) {
+    fun publication(action: Action<MavenPublication>) {
         publicationConfigurators.add(action)
     }
 
@@ -96,14 +94,14 @@ public open class MavenCentralPublishExtension(
      *
      * @see publicationConfigurators
      */
-    public var addProjectComponents: Boolean = true
+    var addProjectComponents: Boolean = true
 
     /**
      * `true` to publish jvm platform artifacts also in root module.
      *
      * This enables Kotlin Multiplatform Projects to be resolved by consumers who has no access to Gradle Metadata (e.g. Maven users).
      */
-    public var publishPlatformArtifactsInRootModule: Boolean = false
+    var publishPlatformArtifactsInRootModule: Boolean = false
 
     ///////////////////////////////////////////////////////////////////////////
     // Quick configurator
@@ -119,7 +117,7 @@ public open class MavenCentralPublishExtension(
      * @param user the name of the organization or the user that this repository belongs to
      * @param repositoryName the name of the repository
      */
-    public fun githubProject(
+    fun githubProject(
         user: String,
         repositoryName: String,
     ) {
@@ -139,7 +137,7 @@ public open class MavenCentralPublishExtension(
      * @param repositoryName the name of the repository
      */
     @JvmOverloads
-    public fun singleDevGithubProject(
+    fun singleDevGithubProject(
         user: String,
         repositoryName: String,
         author: String = user,
@@ -156,7 +154,7 @@ public open class MavenCentralPublishExtension(
      * Add a developer.
      */
     @JvmOverloads
-    public fun developer(
+    fun developer(
         id: String,
         name: String? = id,
         email: String? = null,
@@ -179,7 +177,7 @@ public open class MavenCentralPublishExtension(
     /**
      * Add a developer
      */
-    public fun developer(action: Action<MavenPomDeveloper>) {
+    fun developer(action: Action<MavenPomDeveloper>) {
         pomConfigurators.add {
             it.developers { spec ->
                 spec.developer { dev ->
@@ -197,7 +195,7 @@ public open class MavenCentralPublishExtension(
     /**
      * Adds a license
      */
-    public fun license(
+    fun license(
         name: String,
         url: String,
     ) {
@@ -216,7 +214,7 @@ public open class MavenCentralPublishExtension(
      * Please ensure you used [githubProject] or [singleDevGithubProject], or set [projectUrl] to your project url before this function.
      */
     @JvmOverloads
-    public fun licenseFromGitHubProject(
+    fun licenseFromGitHubProject(
         licenseName: String,
         branchName: String = "main",
     ) {
@@ -231,35 +229,35 @@ public open class MavenCentralPublishExtension(
     /**
      * Configures using GNU General Public License, version 3
      */
-    public fun licenseGplV3() {
+    fun licenseGplV3() {
         license("GNU GPLv3", "https://www.gnu.org/licenses/gpl-3.0.en.html")
     }
 
     /**
      * Configures using GNU General Public License, version 2
      */
-    public fun licenseGplV2() {
+    fun licenseGplV2() {
         license("GNU GPLv2", "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html")
     }
 
     /**
      * Configures using GNU Affero General Public License, version 3
      */
-    public fun licenseAGplV3() {
+    fun licenseAGplV3() {
         license("GNU AGPLv3", "https://www.gnu.org/licenses/agpl-3.0.en.html")
     }
 
     /**
      * Configures using MIT license
      */
-    public fun licenseMit() {
+    fun licenseMit() {
         license("MIT", "https://opensource.org/licenses/MIT")
     }
 
     /**
      * Configures using Apache License, version 2.0
      */
-    public fun licenseApacheV2() {
+    fun licenseApacheV2() {
         license("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
     }
 
@@ -273,19 +271,5 @@ public open class MavenCentralPublishExtension(
      *
      * Will find from project property `PUBLICATION_CREDENTIALS`, `publication.credentials` or from [System.getProperty] and [System.getenv]
      */
-    public var credentials: PublicationCredentials? = project.runCatching {
-        fun find(propName: String): Any? {
-            return findProperty(propName)
-                ?: System.getProperty(propName, null)
-                ?: System.getenv(propName)
-        }
-
-        val info = find("PUBLICATION_CREDENTIALS")
-            ?: find("publication.credentials")
-            ?: return@runCatching null
-
-        @Suppress("EXPERIMENTAL_API_USAGE")
-        ProtoBuf.decodeFromHexString(PublicationCredentials.serializer(), info.toString())
-    }.getOrNull()
-
+    var credentials: PublicationCredentials? = kotlin.runCatching { Credentials.findCredentials(project) }.getOrNull()
 }

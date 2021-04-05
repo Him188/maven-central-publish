@@ -6,9 +6,18 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
 @Serializable
-public class PublicationCredentials(
-    @ProtoNumber(1) public val gpgPublicKey: String,
-    @ProtoNumber(2) public val gpgPrivateKey: String,
-    @ProtoNumber(3) public val sonatypeUsername: String,
-    @ProtoNumber(4) public val sonatypePassword: String,
-)
+data class PublicationCredentials(
+    @ProtoNumber(1) val pgpPublicKey: String,
+    @ProtoNumber(2) val pgpPrivateKey: String,
+    @ProtoNumber(3) val sonatypeUsername: String,
+    @ProtoNumber(4) val sonatypePassword: String,
+) {
+    override fun toString(): String {
+        return """PublicationCredentials(
+                 |  pgpPublicKey='$pgpPublicKey', 
+                 |  pgpPrivateKey='$pgpPrivateKey', 
+                 |  sonatypeUsername='$sonatypeUsername', 
+                 |  sonatypePassword='$sonatypePassword'
+                 |)""".trimMargin()
+    }
+}

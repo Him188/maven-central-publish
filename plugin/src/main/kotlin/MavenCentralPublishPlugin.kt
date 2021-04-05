@@ -8,6 +8,7 @@ import io.github.karlatemp.publicationsign.PublicationSignPlugin
 import org.gradle.api.*
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
@@ -16,12 +17,10 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 
-public class MavenCentralPublishPlugin : Plugin<Project> {
-    private companion object {
-        const val GPG_PUBLIC_KEY_BEGIN = "-----BEGIN PGP PUBLIC KEY BLOCK-----"
-        const val GPG_PUBLIC_KEY_END = "-----END PGP PUBLIC KEY BLOCK-----"
-        const val GPG_PRIVATE_KEY_BEGIN = "-----BEGIN PGP PRIVATE KEY BLOCK-----"
-        const val GPG_PRIVATE_KEY_END = "-----END PGP PRIVATE KEY BLOCK-----"
+class MavenCentralPublishPlugin : Plugin<Project> {
+    companion object {
+        const val CHECK_PUBLICATION_CREDENTIALS = "checkPublicationCredentials"
+        const val CHECK_MAVEN_CENTRAL_PUBLICATION = "checkMavenCentralPublication"
     }
 
     override fun apply(target: Project) {
@@ -31,18 +30,25 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
 
         target.extensions.create(MavenCentralPublishExtension::class.java, "mavenCentralPublish", MavenCentralPublishExtension::class.java, target)
 
-        target.tasks.register("checkPublicationCredentials") { task ->
+        val checkPublicationCredentials = target.tasks.register(CHECK_PUBLICATION_CREDENTIALS) { task ->
             task.group = "publishing"
             task.description = "Check publication credentials."
             task.doLast {
-                val ext = it.project.mcExt
+                val ext = task.project.mcExt
                 val credentials = ext.credentials ?: error("No Publication credentials were set.")
 
-                check(credentials.gpgPublicKey.trimStart().startsWith(GPG_PUBLIC_KEY_BEGIN)) { "Invalid GPG public key" }
-                check(credentials.gpgPublicKey.trimEnd().startsWith(GPG_PUBLIC_KEY_END)) { "Invalid GPG public key" }
+                Credentials.check(credentials)
+            }
+        }
 
-                check(credentials.gpgPrivateKey.trimStart().startsWith(GPG_PRIVATE_KEY_BEGIN)) { "Invalid GPG private key" }
-                check(credentials.gpgPrivateKey.trimEnd().startsWith(GPG_PRIVATE_KEY_END)) { "Invalid GPG private key" }
+        target.tasks.register(CHECK_MAVEN_CENTRAL_PUBLICATION) { task ->
+            task.group = "publishing"
+            task.description = "Check whether information required to maven central publication is provided.."
+            task.dependsOn(checkPublicationCredentials)
+            task.doLast {
+                val ext = task.project.mcExt
+                check(ext.projectUrl.isNotBlank()) { "'projectUrl' is not set. This means `mavenCentralPublish` is not configured." }
+                check(ext.connection.isNotBlank()) { "'connection' is not set. This means `mavenCentralPublish` is not configured." }
             }
         }
 
@@ -50,7 +56,7 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
             afterEvaluate {
                 val ext = target.mcExt
                 val credentials = ext.credentials ?: kotlin.run {
-                    logger.warn("[Publishing] No credentials were set.")
+                    logger.warn("[MavenCentralPublish] No credentials were set.")
                     return@afterEvaluate
                 }
 
@@ -62,16 +68,16 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                     }
                 }
 
-                project.logger.info("Writing public key len=${credentials.gpgPublicKey.length} to \$buildDir/keys/key.pub.")
-                project.logger.info("Writing private key len=${credentials.gpgPrivateKey.length} to \$buildDir/keys/key.pri.")
+                project.logger.info("Writing public key len=${credentials.pgpPublicKey.length} to \$buildDir/keys/key.pub.")
+                project.logger.info("Writing private key len=${credentials.pgpPrivateKey.length} to \$buildDir/keys/key.pri.")
 
                 val keysDir = buildDir.resolve("keys")
 
                 keysDir.run {
                     deleteRecursively() // clear caches
                     mkdirs()
-                    resolve("key.pub").writeText(credentials.gpgPublicKey)
-                    resolve("key.pri").writeText(credentials.gpgPrivateKey)
+                    resolve("key.pub").writeText(credentials.pgpPublicKey)
+                    resolve("key.pri").writeText(credentials.pgpPrivateKey)
                 }
 
                 extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
@@ -85,76 +91,13 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
                     }
                 }
 
-                val sourcesJar = tasks.getOrRegister("sourcesJar", Jar::class.java) {
-                    @Suppress("DEPRECATION")
-                    classifier = "sources"
-                    val sourceSets = project.extensions.getByName<org.gradle.api.tasks.SourceSetContainer>("sourceSets").matching { it.name.endsWith("main", ignoreCase = true) }
-                    for (sourceSet in sourceSets) {
-                        from(sourceSet.allSource)
-                    }
+                if (ext.projectUrl.isEmpty() || ext.connection.isEmpty()) {
+                    logger.warn("[MavenCentralPublish] projectUrl is not set. No publication is being configured. Please invoke `mavenCentralPublish()` according to https://github.com/Him188/maven-central-publish.")
+                    return@afterEvaluate
                 }
 
-                val javadocJar = tasks.getOrRegister("javadocJar", Jar::class.java) {
-                    @Suppress("DEPRECATION")
-                    classifier = "javadoc"
-                }
-
-                extensions.findByType(PublishingExtension::class.java)?.apply {
-                    repositories.maven { repo ->
-                        repo.setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                        repo.credentials { c ->
-                            c.username = credentials.sonatypeUsername
-                            c.password = credentials.sonatypePassword
-                        }
-                    }
-
-                    if (project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null) {
-                        publications.register("MavenCentral", MavenPublication::class.java) { publication ->
-                            publication.run {
-                                if (ext.addProjectComponents) {
-                                    from(components["java"])
-                                }
-                                artifact(sourcesJar)
-                                artifact(javadocJar)
-                                this.groupId = groupId
-                                this.artifactId = artifactId
-                                this.version = project.version.toString()
-                                setupPom(publication, project, ext)
-                                ext.publicationConfigurators.forEach {
-                                    it.execute(this)
-                                }
-                            }
-
-                        }
-                    } else {
-                        publications.filterIsInstance<MavenPublication>().forEach { publication ->
-                            publication.artifact(javadocJar)
-                            setupPom(publication, project, ext)
-
-                            when (val type = publication.name) {
-                                "kotlinMultiplatform" -> {
-                                    publication.artifactId = project.name
-                                }
-                                "common" -> {
-                                }
-                                else -> {
-                                    // "jvm", "native", "js"
-                                    publication.artifactId = "${project.name}-$type"
-                                }
-                            }
-                        }
-                        if (ext.publishPlatformArtifactsInRootModule) {
-                            val jvmTarget =
-                                project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.targets?.find { it.publishable && it.platformType == KotlinPlatformType.jvm }
-                            if (jvmTarget != null) {
-                                val publication = publications.filterIsInstance<MavenPublication>().find { it.name == jvmTarget.name }
-                                if (publication != null) {
-                                    publishPlatformArtifactsInRootModule(publication)
-                                }
-                            }
-                        }
-                    }
-                }
+                registerJarTasks(project)
+                registerPublication("mavenCentral", project, ext)
             }
         }
     }
@@ -187,6 +130,97 @@ public class MavenCentralPublishPlugin : Plugin<Project> {
 
         tasks.matching { it.name == "generatePomFileForKotlinMultiplatformPublication" }.configureEach { task ->
             task.dependsOn(tasks["generatePomFileFor${platformPublication.name.capitalize()}Publication"])
+        }
+    }
+
+    fun registerJarTasks(
+        project: Project,
+    ) = project.run {
+        tasks.getOrRegister("sourcesJar", Jar::class.java) {
+            @Suppress("DEPRECATION")
+            classifier = "sources"
+            val sourceSets = project.extensions.getByName<SourceSetContainer>("sourceSets").matching { it.name.endsWith("main", ignoreCase = true) }
+            for (sourceSet in sourceSets) {
+                from(sourceSet.allSource)
+            }
+        }
+
+        tasks.getOrRegister("javadocJar", Jar::class.java) {
+            @Suppress("DEPRECATION")
+            classifier = "javadoc"
+        }
+    }
+
+    fun registerPublication(
+        name: String,
+        project: Project,
+        ext: MavenCentralPublishExtension,
+    ): Unit = project.run {
+
+        fun getJarTask(classifier: String) =
+            tasks.singleOrNull { it is Jar && it.archiveClassifier.get() == classifier } ?: error("Could not find $classifier Jar task.")
+
+
+        val credentials = ext.credentials ?: return
+
+        extensions.findByType(PublishingExtension::class.java)?.apply {
+            repositories.maven { repo ->
+                repo.setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                repo.credentials { c ->
+                    c.username = credentials.sonatypeUsername
+                    c.password = credentials.sonatypePassword
+                }
+            }
+
+            if (project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null) {
+                publications.register(name, MavenPublication::class.java) { publication ->
+                    publication.run {
+                        if (ext.addProjectComponents) {
+                            from(components["java"])
+                        }
+
+                        artifact(getJarTask("sources"))
+                        artifact(getJarTask("javadoc"))
+                        this.groupId = groupId
+                        this.artifactId = artifactId
+                        this.version = project.version.toString()
+                        setupPom(publication, project, ext)
+                        ext.publicationConfigurators.forEach {
+                            it.execute(this)
+                        }
+                    }
+
+                }
+            } else {
+                publications.filterIsInstance<MavenPublication>().forEach { publication ->
+                    // kotlin configures `sources` for us.
+                    publication.artifact(getJarTask("javadoc"))
+
+                    setupPom(publication, project, ext)
+
+                    when (val type = publication.name) {
+                        "kotlinMultiplatform" -> {
+                            publication.artifactId = project.name
+                        }
+                        "common" -> {
+                        }
+                        else -> {
+                            // "jvm", "native", "js"
+                            publication.artifactId = "${project.name}-$type"
+                        }
+                    }
+                }
+                if (ext.publishPlatformArtifactsInRootModule) {
+                    val jvmTarget =
+                        project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.targets?.find { it.publishable && it.platformType == KotlinPlatformType.jvm }
+                    if (jvmTarget != null) {
+                        val publication = publications.filterIsInstance<MavenPublication>().find { it.name == jvmTarget.name }
+                        if (publication != null) {
+                            publishPlatformArtifactsInRootModule(publication)
+                        }
+                    }
+                }
+            }
         }
     }
 
