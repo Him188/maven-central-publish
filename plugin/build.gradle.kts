@@ -27,12 +27,8 @@ kotlin {
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    compileOnly(kotlin("gradle-plugin-api").toString()) {
-        isTransitive = false
-    }
-    compileOnly(kotlin("gradle-plugin").toString()) {
-        isTransitive = false
-    }
+    api(kotlin("gradle-plugin-api").toString())
+    api(kotlin("gradle-plugin").toString())
     compileOnly(localGroovy())
     compileOnly(kotlin("stdlib"))
 
