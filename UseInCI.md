@@ -29,7 +29,7 @@ jobs:
       - run: chmod +x gradlew
       - run: ./gradlew clean
       - run: ./gradlew build
-      - run: ./gradlew checkPublicationCredentials
+      - run: ./gradlew checkMavenCentralPublication
         env: 
           PUBLICATION_CREDENTIALS: ${{ secrets.PUBLICATION_CREDENTAILS }}  
       - run: ./gradlew publish
