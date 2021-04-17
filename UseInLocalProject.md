@@ -133,7 +133,7 @@ mavenCentralPublish {
 #### Multi developers GitHub project
 
 ```kotlin
-mavenCentralPublish {gradle.properties
+mavenCentralPublish {
     githubProject("GitHub username of the owner of the repository", "GitHub repository name")
     licenseFromGitHubProject("Open-source License name", "Repository main branch name")
     developer("Developer1")

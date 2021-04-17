@@ -31,7 +31,7 @@ jobs:
       - run: ./gradlew build
       - run: ./gradlew checkMavenCentralPublication
         env: 
-          PUBLICATION_CREDENTIALS: ${{ secrets.PUBLICATION_CREDENTAILS }}  
+          PUBLICATION_CREDENTIALS: ${{ secrets.PUBLICATION_CREDENTIALS }}  
       - run: ./gradlew publish
 ```
 
