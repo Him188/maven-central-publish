@@ -32,6 +32,7 @@ jobs:
       - run: ./gradlew checkMavenCentralPublication
         env: 
           PUBLICATION_CREDENTIALS: ${{ secrets.PUBLICATION_CREDENTIALS }}  
+          PUBLICATION_USE_SYSTEM_TEMP: true
       - run: ./gradlew publish
 ```
 
