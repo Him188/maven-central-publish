@@ -9,6 +9,9 @@ import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPomDeveloper
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.provideDelegate
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
 
 /**
  * The extension for Maven Central publication.
@@ -31,6 +34,20 @@ open class MavenCentralPublishExtension(
      * Will find from project property `PUBLICATION_CREDENTIALS`, `publication.credentials` or from [System.getProperty] and [System.getenv]
      */
     var credentials: PublicationCredentials? = kotlin.runCatching { Credentials.findCredentials(project) }.getOrNull()
+
+    /**
+     * Working dir. If you got errors about 'directory too long', please change this.
+     *
+     * When system environment `PUBLICATION_USE_SYSTEM_TEMP` is set to `true`, `/temp/publication-temp/` is used.
+     */
+    var workingDir: File =
+        if (System.getenv("PUBLICATION_USE_SYSTEM_TEMP")?.toBoolean() == true) {
+            try {
+                Files.createTempDirectory("pub-temp").toFile()
+            } catch (e: IOException) {
+                project.buildDir.resolve("keys")
+            }
+        } else project.buildDir.resolve("keys")
 
     ///////////////////////////////////////////////////////////////////////////
     // Project

@@ -5,7 +5,10 @@ package net.mamoe.him188.maven.central.publish.gradle
 import io.codearte.gradle.nexus.NexusStagingExtension
 import io.codearte.gradle.nexus.NexusStagingPlugin
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
-import org.gradle.api.*
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.XmlProvider
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
@@ -68,10 +71,12 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     }
                 }
 
-                project.logger.info("Writing public key len=${credentials.pgpPublicKey.length} to \$buildDir/keys/key.pub.")
-                project.logger.info("Writing private key len=${credentials.pgpPrivateKey.length} to \$buildDir/keys/key.pri.")
+                project.logger.info("[MavenCentralPublish] Writing public key len=${credentials.pgpPublicKey.length} to \$buildDir/keys/key.pub.")
+                project.logger.info("[MavenCentralPublish] Writing private key len=${credentials.pgpPrivateKey.length} to \$buildDir/keys/key.pri.")
 
-                val keysDir = buildDir.resolve("keys")
+                project.logger.info("[MavenCentralPublish] workingDir=${ext.workingDir.absolutePath}")
+
+                val keysDir = ext.workingDir
 
                 keysDir.run {
                     deleteRecursively() // clear caches
