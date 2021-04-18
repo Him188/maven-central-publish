@@ -6,7 +6,12 @@
 
 ## I have used this plugin before
 
-1. Apply Gradle plugin `net.mamoe.maven-central-publish`, version `0.4.1`
+1. Apply Gradle plugin
+   ```kotlin
+   plugins {
+      id("net.mamoe.maven-central-publish") version "0.4.1"
+   }
+   ```
 2. Configure `mavenCentralPublish`  
    Raed `MavenCentralPublishExtension.pomConfigurators` for required information, **or** simply configure a GitHub project like:
    ```kotlin
