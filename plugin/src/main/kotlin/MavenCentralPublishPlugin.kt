@@ -162,7 +162,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     ): Unit = project.run {
 
         fun getJarTask(classifier: String) =
-            tasks.singleOrNull { it is Jar && it.archiveClassifier.get() == classifier } ?: error("Could not find $classifier Jar task.")
+            tasks.singleOrNull { it is Jar && it.name == "${classifier}Jar" }
+                ?: tasks.firstOrNull { it is Jar && it.archiveClassifier.get() == classifier }
+                ?: error("Could not find $classifier Jar task.")
 
 
         val credentials = ext.credentials ?: return
