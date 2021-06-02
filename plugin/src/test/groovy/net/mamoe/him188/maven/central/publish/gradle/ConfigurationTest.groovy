@@ -1,6 +1,6 @@
 package net.mamoe.him188.maven.central.publish.gradle
 
-import org.gradle.testkit.runner.GradleRunner
+
 import org.junit.jupiter.api.Test
 
 import static net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin.CHECK_MAVEN_CENTRAL_PUBLICATION
@@ -16,8 +16,7 @@ class ConfigurationTest extends AbstractPluginTest {
                 connection = "foo"
             }
         """
-        def result = GradleRunner.create()
-                .withProjectDir(tempDir)
+        def result = gradleRunner()
                 .withArguments(
                         CHECK_MAVEN_CENTRAL_PUBLICATION,
                         '--stacktrace'
@@ -25,8 +24,6 @@ class ConfigurationTest extends AbstractPluginTest {
                 .withEnvironment([
                         "PUBLICATION_CREDENTIALS": credentialsHex
                 ])
-                .withPluginClasspath()
-                .forwardOutput()
                 .buildAndFail()
 
         assert result.task(":$CHECK_MAVEN_CENTRAL_PUBLICATION").outcome == FAILED
@@ -40,8 +37,7 @@ class ConfigurationTest extends AbstractPluginTest {
                 projectUrl = "foo"
             }
         """
-        def result = GradleRunner.create()
-                .withProjectDir(tempDir)
+        def result = gradleRunner()
                 .withArguments(
                         CHECK_MAVEN_CENTRAL_PUBLICATION,
                         '--stacktrace'
@@ -49,8 +45,6 @@ class ConfigurationTest extends AbstractPluginTest {
                 .withEnvironment([
                         "PUBLICATION_CREDENTIALS": credentialsHex
                 ])
-                .withPluginClasspath()
-                .forwardOutput()
                 .buildAndFail()
 
         assert result.task(":$CHECK_MAVEN_CENTRAL_PUBLICATION").outcome == FAILED
@@ -65,8 +59,7 @@ class ConfigurationTest extends AbstractPluginTest {
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
         """
-        def result = GradleRunner.create()
-                .withProjectDir(tempDir)
+        def result = gradleRunner()
                 .withArguments(
                         CHECK_MAVEN_CENTRAL_PUBLICATION,
                         '--stacktrace'
@@ -74,8 +67,6 @@ class ConfigurationTest extends AbstractPluginTest {
                 .withEnvironment([
                         "PUBLICATION_CREDENTIALS": credentialsHex
                 ])
-                .withPluginClasspath()
-                .forwardOutput()
                 .build()
 
         assert result.task(":$CHECK_MAVEN_CENTRAL_PUBLICATION").outcome == SUCCESS

@@ -27,8 +27,8 @@ kotlin {
 dependencies {
     compileOnly(gradleApi())
     compileOnly(gradleKotlinDsl())
-    api(kotlin("gradle-plugin-api").toString())
-    api(kotlin("gradle-plugin").toString())
+    compileOnly(kotlin("gradle-plugin-api"))
+    compileOnly(kotlin("gradle-plugin"))
     compileOnly(localGroovy())
     compileOnly(kotlin("stdlib"))
 
@@ -46,7 +46,8 @@ dependencies {
     testApi("org.junit.jupiter:junit-jupiter-params:${rootProject.extra.get("junit")}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
     testApi("org.spockframework:spock-core:1.3-groovy-2.5")
-    testImplementation(kotlin("gradle-plugin"))
+    testRuntimeOnly(kotlin("gradle-plugin-api"))
+    testRuntimeOnly(kotlin("gradle-plugin"))
     testImplementation(gradleTestKit())
 }
 

@@ -24,6 +24,8 @@ abstract class AbstractPluginTest {
         GradleRunner.create()
                 .withProjectDir(tempDir)
                 .withPluginClasspath()
+                .withGradleDistribution(new URI("https://services.gradle.org/distributions/gradle-6.8.3-bin.zip"))
+                .withGradleVersion("6.8.3")
                 .forwardOutput()
                 .withEnvironment(System.getenv())
     }
@@ -39,7 +41,7 @@ abstract class AbstractPluginTest {
                     mavenCentral()
                 }
             }
-        """
+        """.stripIndent()
 
 
         propertiesFile = new File(tempDir, "gradle.properties")
@@ -53,17 +55,20 @@ abstract class AbstractPluginTest {
         """.stripMargin()
 
 
-        buildFile = new File(tempDir, "build.gradle")
+        buildFile = new File(tempDir, "build.gradle.kts")
         buildFile.delete()
         buildFile << """
             plugins {
-                id 'net.mamoe.maven-central-publish'
-                id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+                kotlin("jvm") version "1.5.10"
+                id("net.mamoe.maven-central-publish")
             }
-            repositories {
-                mavenCentral()
+            allprojects {
+                repositories {
+                    mavenCentral()
+                    gradlePluginPortal()
+                }
             }
-        """
+        """.stripIndent()
     }
 
     @AfterEach
