@@ -8,7 +8,6 @@ import org.gradle.api.Project
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPomDeveloper
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.kotlin.dsl.provideDelegate
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files

@@ -14,8 +14,6 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.jvm.tasks.Jar
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
@@ -133,7 +131,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         }
 
         tasks.matching { it.name == "generatePomFileForKotlinMultiplatformPublication" }.configureEach { task ->
-            task.dependsOn(tasks["generatePomFileFor${platformPublication.name.capitalize()}Publication"])
+            task.dependsOn("generatePomFileFor${platformPublication.name.capitalize()}Publication")
         }
     }
 
@@ -143,7 +141,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         tasks.getOrRegister("sourcesJar", Jar::class.java) {
             @Suppress("DEPRECATION")
             classifier = "sources"
-            val sourceSets = project.extensions.getByName<SourceSetContainer>("sourceSets").matching { it.name.endsWith("main", ignoreCase = true) }
+            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching { it.name.endsWith("main", ignoreCase = true) }
             for (sourceSet in sourceSets) {
                 from(sourceSet.allSource)
             }
@@ -182,7 +180,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 publications.register(name, MavenPublication::class.java) { publication ->
                     publication.run {
                         if (ext.addProjectComponents) {
-                            from(components["java"])
+                            from(components.getByName("java"))
                         }
 
                         artifact(getJarTask("sources"))
