@@ -25,29 +25,21 @@ kotlin {
 }
 
 dependencies {
-    compileOnly(gradleApi())
-    compileOnly(gradleKotlinDsl())
-    api(kotlin("gradle-plugin-api").toString())
-    api(kotlin("gradle-plugin").toString())
-    compileOnly(localGroovy())
-    compileOnly(kotlin("stdlib"))
+    compileOnly(kotlin("gradle-plugin"))
 
-    //api(project(":maven-central-publish-protocol"))
-
+    implementation(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
+    implementation("io.github.karlatemp:PublicationSign:1.1.0")
+    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 
-    api("io.github.karlatemp:PublicationSign:1.1.0")
-    api("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
-
-
-    testApi(kotlin("test-junit5"))
-    testApi("org.junit.jupiter:junit-jupiter-api:${rootProject.extra.get("junit")}")
-    testApi("org.junit.jupiter:junit-jupiter-params:${rootProject.extra.get("junit")}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
-    testApi("org.spockframework:spock-core:1.3-groovy-2.5")
-    testImplementation(kotlin("gradle-plugin"))
+    testImplementation(localGroovy())
+    testImplementation(kotlin("test-junit5"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${rootProject.extra.get("junit")}")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:${rootProject.extra.get("junit")}")
     testImplementation(gradleTestKit())
+
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
 }
 
 tasks.withType(Test::class) {
