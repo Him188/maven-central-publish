@@ -9,7 +9,7 @@
 1. Apply Gradle plugin
    ```kotlin
    plugins {
-      id("net.mamoe.maven-central-publish") version "0.4.2"
+      id("net.mamoe.maven-central-publish") version "0.4.3"
    }
    ```
 2. Configure `mavenCentralPublish`  
@@ -101,7 +101,7 @@ The plugin should be applied to the subproject that needs to be published. Apply
 #### Using `build.gradle.kts`
 ```kotlin
 plugins {
-    id("net.mamoe.maven-central-publish") version "0.4.2"
+    id("net.mamoe.maven-central-publish") version "0.4.3"
     // then apply other plugins if needed
 }
 ```
@@ -109,7 +109,7 @@ plugins {
 #### Using `build.gradle`
 ```
 plugins {
-    id 'net.mamoe.maven-central-publish' version '0.4.2' 
+    id 'net.mamoe.maven-central-publish' version '0.4.3' 
     // then apply other plugins if needed
 }
 ```
