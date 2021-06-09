@@ -33,7 +33,7 @@ class KotlinTransitiveDependenciesIntegrationTest {
             .withPluginClasspath()
             .forwardStdOutput(PrintWriter(stdout))
             .forwardStdError(PrintWriter(stderr))
-            .withArguments(listOf("dependencies"))
+            .withArguments(listOf("dependencies", "--stacktrace"))
             .build()
 
         System.out.println(stdout)

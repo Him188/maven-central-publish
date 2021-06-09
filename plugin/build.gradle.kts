@@ -24,6 +24,8 @@ kotlin {
     }
 }
 
+/*
+ */
 dependencies {
     compileOnly(kotlin("gradle-plugin"))
 
