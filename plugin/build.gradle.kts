@@ -24,6 +24,13 @@ kotlin {
     }
 }
 
+/**
+ * Because we use compileOnly for kotlin-gradle-plugin, it would be missing
+ * in plugin-under-test-metadata.properties. Here we inject the jar into TestKit plugin
+ * classpath via PluginUnderTestMetadata to avoid to avoid NoClassDefFoundError.
+ */
+val kotlinVersionForIntegrationTest: Configuration by configurations.creating
+
 dependencies {
     compileOnly(kotlin("gradle-plugin"))
 
@@ -40,6 +47,13 @@ dependencies {
     testImplementation(gradleTestKit())
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
+
+    // Note: this version should be same as `KotlinTransitiveDependenciesIntegrationTest`
+    kotlinVersionForIntegrationTest("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21")
+}
+
+tasks.named<PluginUnderTestMetadata>("pluginUnderTestMetadata") {
+     pluginClasspath.from(kotlinVersionForIntegrationTest)
 }
 
 tasks.withType(Test::class) {

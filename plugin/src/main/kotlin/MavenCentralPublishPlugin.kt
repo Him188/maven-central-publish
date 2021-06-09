@@ -15,6 +15,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 
@@ -28,6 +29,8 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         target.rootProject.plugins.apply(NexusStagingPlugin::class.java)
         target.plugins.apply("maven-publish")
         target.plugins.apply(PublicationSignPlugin::class.java)
+
+        println(target.extensions.findByType(KotlinProjectExtension::class.java))
 
         target.extensions.create(MavenCentralPublishExtension::class.java, "mavenCentralPublish", MavenCentralPublishExtension::class.java, target)
 
