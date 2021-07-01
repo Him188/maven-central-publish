@@ -225,6 +225,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                             }
                         }
                     }
+                    ext.publicationConfigurators.forEach {
+                        it.execute(publication)
+                    }
                 }
                 if (ext.publishPlatformArtifactsInRootModule) {
                     val jvmTarget =
