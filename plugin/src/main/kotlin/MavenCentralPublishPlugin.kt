@@ -151,6 +151,15 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             @Suppress("DEPRECATION")
             classifier = "javadoc"
         }
+
+        tasks.getOrRegister("samplessourcesJar", Jar::class.java) {
+            @Suppress("DEPRECATION")
+            classifier = "samplessources"
+            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching { it.name.endsWith("test", ignoreCase = true) }
+            for (sourceSet in sourceSets) {
+                from(sourceSet.allSource)
+            }
+        }
     }
 
     fun registerPublication(
@@ -211,6 +220,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                         else -> {
                             // "jvm", "native", "js"
                             publication.artifactId = "${project.name}-$type"
+                            if (publication.name.contains("js", ignoreCase = true)) {
+                                publication.artifact(getJarTask("samplessources"))
+                            }
                         }
                     }
                 }
