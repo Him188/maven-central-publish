@@ -38,7 +38,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
     implementation("io.github.karlatemp:PublicationSign:1.1.0")
-    implementation("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0")
 
     testImplementation(localGroovy())
     testImplementation(kotlin("test-junit5"))

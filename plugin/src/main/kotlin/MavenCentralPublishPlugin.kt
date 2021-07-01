@@ -2,8 +2,6 @@
 
 package net.mamoe.him188.maven.central.publish.gradle
 
-import io.codearte.gradle.nexus.NexusStagingExtension
-import io.codearte.gradle.nexus.NexusStagingPlugin
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,7 +23,6 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     }
 
     override fun apply(target: Project) {
-        target.rootProject.plugins.apply(NexusStagingPlugin::class.java)
         target.plugins.apply("maven-publish")
         target.plugins.apply(PublicationSignPlugin::class.java)
 
@@ -59,14 +56,6 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 val credentials = ext.credentials ?: kotlin.run {
                     logger.warn("[MavenCentralPublish] No credentials were set.")
                     return@afterEvaluate
-                }
-
-                rootProject.extensions.configure(NexusStagingExtension::class.java) { nexus ->
-                    with(nexus) {
-                        if (packageGroup == null) packageGroup = ext.packageGroup
-                        if (username == null) username = credentials.sonatypeUsername
-                        if (password == null) password = credentials.sonatypePassword
-                    }
                 }
 
                 project.logger.info("[MavenCentralPublish] Writing public key len=${credentials.pgpPublicKey.length} to \$buildDir/keys/key.pub.")
