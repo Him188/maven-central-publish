@@ -37,7 +37,7 @@ dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
-    implementation("io.github.karlatemp:PublicationSign:1.3.1")
+    implementation("io.github.karlatemp:PublicationSign:1.3.4")
 
     testImplementation(localGroovy())
     testImplementation(kotlin("test-junit5"))
@@ -48,7 +48,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${rootProject.extra.get("junit")}")
 
     // Note: this version should be same as `KotlinTransitiveDependenciesIntegrationTest`
-    kotlinVersionForIntegrationTest("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21")
+    kotlinVersionForIntegrationTest("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10")
 }
 
 tasks.named<PluginUnderTestMetadata>("pluginUnderTestMetadata") {

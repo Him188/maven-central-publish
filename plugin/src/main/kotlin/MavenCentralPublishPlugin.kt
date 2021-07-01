@@ -2,6 +2,8 @@
 
 package net.mamoe.him188.maven.central.publish.gradle
 
+import groovy.util.Node
+import groovy.util.NodeList
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -12,8 +14,6 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 
 class MavenCentralPublishPlugin : Plugin<Project> {
@@ -26,7 +26,12 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         target.plugins.apply("maven-publish")
         target.plugins.apply(PublicationSignPlugin::class.java)
 
-        target.extensions.create(MavenCentralPublishExtension::class.java, "mavenCentralPublish", MavenCentralPublishExtension::class.java, target)
+        target.extensions.create(
+            MavenCentralPublishExtension::class.java,
+            "mavenCentralPublish",
+            MavenCentralPublishExtension::class.java,
+            target
+        )
 
         val checkPublicationCredentials = target.tasks.register(CHECK_PUBLICATION_CREDENTIALS) { task ->
             task.group = "publishing"
@@ -94,30 +99,36 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     }
 
     private fun Project.publishPlatformArtifactsInRootModule(platformPublication: MavenPublication) {
-        lateinit var platformPomBuilder: XmlProvider
-        platformPublication.pom.withXml { platformPomBuilder = it }
+        lateinit var platformXml: XmlProvider
+        platformPublication.pom.withXml { platformXml = it }
 
-        extensions.findByType(PublishingExtension::class.java)?.publications?.getByName("kotlinMultiplatform")?.let { it as MavenPublication }?.run {
-            this.artifacts.removeIf {
-                it.classifier == null && it.extension == "jar"
-            }
+        extensions.findByType(PublishingExtension::class.java)
+            ?.publications?.getByName("kotlinMultiplatform")
+            ?.let { it as MavenPublication }?.run {
 
-            platformPublication.artifacts.forEach {
-                artifact(it)
-            }
+                // replace pom
+                pom.withXml { xmlProvider ->
+                    val root = xmlProvider.asNode()
+                    // Remove the original content and add the content from the platform POM:
+                    root.children().toList().forEach { root.remove(it as Node) }
+                    platformXml.asNode().children().forEach { root.append(it as Node) }
 
-            // replace pom
-            pom.withXml { xmlProvider ->
-                val pomStringBuilder = xmlProvider.asString()
-                pomStringBuilder.setLength(0)
-                platformPomBuilder.toString().lines().forEach { line ->
-                    if (!line.contains("<!--")) { // Remove the Gradle module metadata marker as it will be added anew
-                        pomStringBuilder.append(line.replace(platformPublication.artifactId, artifactId))
-                        pomStringBuilder.append("\n")
-                    }
+                    // Adjust the self artifact ID, as it should match the root module's coordinates:
+                    ((root.get("artifactId") as NodeList).get(0) as Node).setValue(artifactId)
+
+                    // Set packaging to POM to indicate that there's no artifact:
+                    root.appendNode("packaging", "pom")
+
+                    // Remove the original platform dependencies and add a single dependency on the platform module:
+                    val dependencies = (root.get("dependencies") as NodeList).get(0) as Node
+                    dependencies.children().toList().forEach { dependencies.remove(it as Node) }
+                    val singleDependency = dependencies.appendNode("dependency")
+                    singleDependency.appendNode("groupId", platformPublication.groupId)
+                    singleDependency.appendNode("artifactId", platformPublication.artifactId)
+                    singleDependency.appendNode("version", platformPublication.version)
+                    singleDependency.appendNode("scope", "compile")
                 }
             }
-        }
 
         tasks.matching { it.name == "generatePomFileForKotlinMultiplatformPublication" }.configureEach { task ->
             task.dependsOn("generatePomFileFor${platformPublication.name.capitalize()}Publication")
@@ -130,7 +141,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         tasks.getOrRegister("sourcesJar", Jar::class.java) {
             @Suppress("DEPRECATION")
             classifier = "sources"
-            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching { it.name.endsWith("main", ignoreCase = true) }
+            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching {
+                it.name.endsWith("main", ignoreCase = true)
+            }
             for (sourceSet in sourceSets) {
                 from(sourceSet.allSource)
             }
@@ -144,7 +157,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         tasks.getOrRegister("samplessourcesJar", Jar::class.java) {
             @Suppress("DEPRECATION")
             classifier = "samplessources"
-            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching { it.name.endsWith("test", ignoreCase = true) }
+            val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching {
+                it.name.endsWith("test", ignoreCase = true)
+            }
             for (sourceSet in sourceSets) {
                 from(sourceSet.allSource)
             }
@@ -196,7 +211,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             } else {
                 publications.filterIsInstance<MavenPublication>().forEach { publication ->
                     // kotlin configures `sources` for us.
-                    publication.artifact(getJarTask("javadoc"))
+                    if (publication.name != "kotlinMultiplatform") publication.artifact(getJarTask("javadoc"))
 
                     setupPom(publication, project, ext)
 
@@ -204,29 +219,28 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                         "kotlinMultiplatform" -> {
                             publication.artifactId = project.name
                         }
-                        "common" -> {
-                        }
-                        else -> {
-                            // "jvm", "native", "js"
+                        "metadata", "jvm", "native", "js" -> {
                             publication.artifactId = "${project.name}-$type"
                             if (publication.name.contains("js", ignoreCase = true)) {
                                 publication.artifact(getJarTask("samplessources"))
                             }
                         }
+                        // mingwx64 and others
                     }
                     ext.publicationConfigurators.forEach {
                         it.execute(publication)
                     }
                 }
-                if (ext.publishPlatformArtifactsInRootModule) {
-                    val jvmTarget =
-                        project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.targets?.find { it.publishable && it.platformType == KotlinPlatformType.jvm }
-                    if (jvmTarget != null) {
-                        val publication = publications.filterIsInstance<MavenPublication>().find { it.name == jvmTarget.name }
-                        if (publication != null) {
-                            publishPlatformArtifactsInRootModule(publication)
-                        }
-                    }
+                if (ext.publishPlatformArtifactsInRootModule != null) {
+                    val targetName = ext.publishPlatformArtifactsInRootModule
+                    val publication =
+                        publications.filterIsInstance<MavenPublication>()
+                            .find { it.artifactId == "${project.name}-$targetName" }
+                            ?: error(
+                                "Could not find publication with artifactId '${project.name}-$targetName' for root module. " +
+                                        "This means the target name '$targetName' you specifdied to `publishPlatformArtifactsInRootModule` is invalid."
+                            )
+                    publishPlatformArtifactsInRootModule(publication)
                 }
             }
         }

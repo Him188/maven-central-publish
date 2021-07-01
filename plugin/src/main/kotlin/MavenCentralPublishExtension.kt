@@ -70,7 +70,9 @@ open class MavenCentralPublishExtension(
      *
      * Task `closeAndReleaseRepository` depends on this value.
      */
-    var packageGroup: String by lazyDefault { credentials?.packageGroup ?: (project.group ?: project.rootProject.group).toString() }
+    var packageGroup: String by lazyDefault {
+        credentials?.packageGroup ?: (project.group ?: project.rootProject.group).toString()
+    }
 
     /**
      * [MavenPom] (`pom.xml`) configurators.
@@ -139,11 +141,11 @@ open class MavenCentralPublishExtension(
     var addProjectComponents: Boolean = true
 
     /**
-     * `true` to publish jvm platform artifacts also in root module.
+     * The target name to be published also in root module. Example value: `"jvm"`.
      *
-     * This enables Kotlin Multiplatform Projects to be resolved by consumers who has no access to Gradle Metadata (e.g. Maven users).
+     * This enables Kotlin Multiplatform Projects to be resolved by consumers who has no access to Gradle Metadata (e.g., Maven users).
      */
-    var publishPlatformArtifactsInRootModule: Boolean = false
+    var publishPlatformArtifactsInRootModule: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
     // Quick configurator

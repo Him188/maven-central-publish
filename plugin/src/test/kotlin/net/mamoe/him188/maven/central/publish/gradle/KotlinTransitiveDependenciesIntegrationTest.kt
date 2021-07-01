@@ -1,4 +1,4 @@
-package net.mamoe.him188.maven.central.publish.gradle.net.mamoe.him188.maven.central.publish.gradle
+package net.mamoe.him188.maven.central.publish.gradle
 
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions
@@ -13,7 +13,7 @@ class KotlinTransitiveDependenciesIntegrationTest {
     fun `user can override Kotlin plugin version`(@TempDir dir: File) {
         // We're packaging the plugin with kotlin transitive dependencies > 1.4.30
         // This is testing that users are free to use different versions
-        val userSpecifiedKotlinPluginVersion = "1.4.21"
+        val userSpecifiedKotlinPluginVersion = "1.5.10"
         dir.resolve("settings.gradle").writeText("")
         dir.resolve("build.gradle").writeText(
             """

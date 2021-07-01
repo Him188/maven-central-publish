@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 
 abstract class AbstractPluginTest {
-    static String credentialsHex = PublishingTest.classLoader.getResource("credentials.txt").readLines().join("\n")
+    static String credentialsHex = AbstractPluginTest.classLoader.getResource("credentials.txt").readLines().join("\n")
 
     @TempDir
     public File tempDir
@@ -23,9 +23,9 @@ abstract class AbstractPluginTest {
     def gradleRunner() {
         GradleRunner.create()
                 .withProjectDir(tempDir)
+                .withGradleVersion("6.8.3")
                 .withPluginClasspath()
                 .forwardOutput()
-                .withEnvironment(System.getenv())
     }
 
     @BeforeEach
