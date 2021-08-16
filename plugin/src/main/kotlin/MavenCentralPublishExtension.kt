@@ -48,6 +48,26 @@ open class MavenCentralPublishExtension(
             }
         } else project.buildDir.resolve("keys")
 
+    /**
+     * Set which server is to access to.
+     *
+     * If your account was created after February 2021, you may need to use [useCentralS01].
+     *
+     * See [the official documentation](https://central.sonatype.org/publish/publish-guide/#releasing-to-central) for more information.
+     *
+     * If [deploymentServerUrl] is set to `null`, no server will be configured, so you can customize the server.
+     */
+    var deploymentServerUrl: String? = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+
+    /**
+     * Sets [deploymentServerUrl] to `https://s01.oss.sonatype.org/service/local/staging/deploy/maven2`.
+     *
+     * If your account was created after February 2021, you need to use this new server.
+     */
+    fun useCentralS01() {
+        deploymentServerUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Project
     ///////////////////////////////////////////////////////////////////////////

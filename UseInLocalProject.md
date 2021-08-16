@@ -116,6 +116,20 @@ plugins {
 
 ### 2. Configure publishing
 
+#### Determining which server to deploy to
+
+If your Sonatype account was created after February 2021, you may need to use the new server.
+```kotlin
+mavenCentralPublish {
+    useCentralS01() // use new server
+    // ... add other configurations
+}
+```
+
+When you get error about 'Unauthorized' when executing the task `publish`, you might consider using the new or the old server (by removing the `useCentralS01()`).
+
+> You can read more on [the official documentation](https://central.sonatype.org/publish/publish-guide/#releasing-to-central)
+
 #### Single developer GitHub project
 
 A simple configurator for GitHub projects with single developer.

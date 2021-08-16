@@ -179,14 +179,18 @@ class MavenCentralPublishPlugin : Plugin<Project> {
 
 
         val credentials = ext.credentials ?: return
-
         extensions.findByType(PublishingExtension::class.java)?.apply {
-            repositories.maven { repo ->
-                repo.setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                repo.credentials { c ->
-                    c.username = credentials.sonatypeUsername
-                    c.password = credentials.sonatypePassword
+            val deploymentServerUrl = ext.deploymentServerUrl
+            if (deploymentServerUrl != null) {
+                repositories.maven { repo ->
+                    repo.setUrl(deploymentServerUrl)
+                    repo.credentials { c ->
+                        c.username = credentials.sonatypeUsername
+                        c.password = credentials.sonatypePassword
+                    }
                 }
+            } else {
+                logger.warn("[MavenCentralPublish] `deploymentServerUrl` was set to `null`, so no server is being automatically set. ")
             }
 
             if (project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null) {
