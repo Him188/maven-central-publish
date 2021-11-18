@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVer = "1.4.30"
+    val kotlinVer = "1.6.0"
     kotlin("jvm") version kotlinVer
     kotlin("plugin.serialization") version kotlinVer apply false
     id("com.gradle.plugin-publish") version "0.13.0" apply false
