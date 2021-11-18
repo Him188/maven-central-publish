@@ -21,7 +21,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - uses: maxim-lobanov/setup-xcode@v1
-        if: "${{ matrix.os  == 'macos-latest' }}"
+        if: "${{ matrix.os  == 'macos-11' }}"
         with:
           xcode-version: latest
       - uses: actions/checkout@v2
@@ -31,12 +31,12 @@ jobs:
       - run: chmod +x gradlew
       - run: ./gradlew build --scan
       - uses: actions/upload-artifact@v2
-        if: "${{ matrix.os  == 'macos-latest' }}"
+        if: "${{ matrix.os  == 'macos-11' }}"
         with:
           name: macos-x64
           path: generator/build/bin/macosX64/releaseExecutable/maven-central-publish-generator.kexe
       - uses: actions/upload-artifact@v2
-        if: "${{ matrix.os  == 'macos-latest' }}"
+        if: "${{ matrix.os  == 'macos-11' }}"
         with:
           name: linux-x64
           path: generator/build/bin/linuxX64/releaseExecutable/maven-central-publish-generator.kexe
