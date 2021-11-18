@@ -10,7 +10,7 @@ jobs:
       matrix:
         os:
           - windows-latest
-          - macos-latest
+          - macos-11
     steps:
       - uses: actions/cache@v2
         with:
