@@ -12,5 +12,4 @@ abstract class AbstractPublishingTest {
     }
 
     val publisherDir: File by lazy { createTempDirSmart() }
-    val consumerDir: File by lazy { createTempDirSmart() }
 }

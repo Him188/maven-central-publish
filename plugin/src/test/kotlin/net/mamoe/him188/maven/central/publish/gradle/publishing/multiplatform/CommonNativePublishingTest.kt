@@ -126,6 +126,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
 
         println("Publishing succeed.")
 
+        testJvmConsume(packageName, group, name, version)
         testMppConsume(packageName, group, name, version)
     }
 
@@ -262,6 +263,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
 
         println("Publishing succeed.")
 
+        testJvmConsume(packageName, originalGroup, originalName, originalVersion)
         testMppConsume(packageName, originalGroup, originalName, originalVersion)
     }
 

@@ -1,10 +1,10 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
+import net.mamoe.him188.maven.central.publish.gradle.createTempDirSmart
 import net.mamoe.him188.maven.central.publish.gradle.publishing.AbstractPublishingTest
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
     val configureKotlinSourceSets = "\n" + """
@@ -33,6 +33,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
         name: String,
         version: String
     ) {
+        val consumerDir = createTempDirSmart()
         consumerDir.mkdirs()
         consumerDir.resolve("gradle.properties").writeText(
             """
@@ -41,7 +42,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
                 kotlin.native.enableDependencyPropagation=false
             """.trimIndent()
         )
-        assertTrue { consumerDir.resolve("src/commonMain/kotlin/").mkdirs() }
+        consumerDir.resolve("src/commonMain/kotlin/").mkdirs()
         consumerDir.resolve("src/commonMain/kotlin/main.kt")
             .writeText("import $packageName.Test; \nfun main() { println(Test.toString()) }")
         consumerDir.resolve("build.gradle.kts").writeText(
@@ -64,7 +65,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
         )
 
         val result2 = GradleRunner.create()
-            .withProjectDir(publisherDir)
+            .withProjectDir(consumerDir)
             .withArguments(
                 "clean",
                 "assemble",
@@ -77,7 +78,49 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
             .runCatching {
                 build()
             }.onFailure {
-                publisherDir.walk().forEach { println(it) }
+                consumerDir.walk().forEach { println(it) }
+            }.getOrThrow()
+        assertEquals(TaskOutcome.SUCCESS, result2.task(":assemble")!!.outcome)
+    }
+
+    fun testJvmConsume(
+        packageName: String,
+        groupId: String,
+        artifactId: String,
+        version: String
+    ) {
+        val consumerDir = createTempDirSmart()
+        consumerDir.mkdirs()
+        consumerDir.resolve("src/main/kotlin/").mkdirs()
+        consumerDir.resolve("src/main/kotlin/main.kt")
+            .writeText("import $packageName.Test; \nfun main() { println(Test.toString()) }")
+        consumerDir.resolve("build.gradle.kts").writeText(
+            """
+                plugins {
+                    kotlin("jvm") version "1.5.10"
+                }
+                repositories { mavenCentral(); mavenLocal() }
+                dependencies {
+                    implementation("$groupId:$artifactId:$version")
+                }
+            """.trimIndent()
+        )
+
+        val result2 = GradleRunner.create()
+            .withProjectDir(consumerDir)
+            .withArguments(
+                "clean",
+                "assemble",
+                "--stacktrace",
+            )
+            .withGradleVersion("7.1")
+            .withPluginClasspath()
+            .forwardOutput()
+            .withEnvironment(System.getenv())
+            .runCatching {
+                build()
+            }.onFailure {
+                consumerDir.walk().forEach { println(it) }
             }.getOrThrow()
         assertEquals(TaskOutcome.SUCCESS, result2.task(":assemble")!!.outcome)
     }
