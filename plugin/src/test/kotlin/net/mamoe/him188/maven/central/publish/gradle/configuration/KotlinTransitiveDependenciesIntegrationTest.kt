@@ -1,4 +1,4 @@
-package net.mamoe.him188.maven.central.publish.gradle
+package net.mamoe.him188.maven.central.publish.gradle.configuration
 
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions

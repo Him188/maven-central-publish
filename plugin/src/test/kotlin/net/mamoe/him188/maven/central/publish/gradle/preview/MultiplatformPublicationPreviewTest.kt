@@ -1,4 +1,4 @@
-package net.mamoe.him188.maven.central.publish.gradle.net.mamoe.him188.maven.central.publish.gradle.preview
+package net.mamoe.him188.maven.central.publish.gradle.preview
 
 import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
 import org.gradle.testkit.runner.GradleRunner
