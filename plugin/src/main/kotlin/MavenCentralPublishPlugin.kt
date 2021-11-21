@@ -63,18 +63,20 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     return@afterEvaluate
                 }
 
-                project.logger.info("[MavenCentralPublish] Writing public key len=${credentials.pgpPublicKey.length} to \$buildDir/keys/key.pub.")
-                project.logger.info("[MavenCentralPublish] Writing private key len=${credentials.pgpPrivateKey.length} to \$buildDir/keys/key.pri.")
+                project.logger.info("[MavenCentralPublish] credentials: length=${credentials.toString().length}")
 
                 project.logger.info("[MavenCentralPublish] workingDir=${ext.workingDir.absolutePath}")
+
+                project.logger.info("[MavenCentralPublish] Writing public key len=${credentials.pgpPublicKey.length} to \$workingDir/keys/key.pub.")
+                project.logger.info("[MavenCentralPublish] Writing private key len=${credentials.pgpPrivateKey.length} to \$workingDir/keys/key.pri.")
 
                 val keysDir = ext.workingDir
 
                 keysDir.run {
                     deleteRecursively() // clear caches
                     mkdirs()
-                    resolve("key.pub").writeText(credentials.pgpPublicKey)
-                    resolve("key.pri").writeText(credentials.pgpPrivateKey)
+                    resolve("key.pub").apply { createNewFile() }.writeText(credentials.pgpPublicKey)
+                    resolve("key.pri").apply { createNewFile() }.writeText(credentials.pgpPrivateKey)
                 }
 
                 extensions.configure(io.github.karlatemp.publicationsign.PublicationSignExtension::class.java) { sign ->
