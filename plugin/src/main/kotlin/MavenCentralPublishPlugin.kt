@@ -5,6 +5,7 @@ package net.mamoe.him188.maven.central.publish.gradle
 import groovy.util.Node
 import groovy.util.NodeList
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -20,6 +21,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     companion object {
         const val CHECK_PUBLICATION_CREDENTIALS = "checkPublicationCredentials"
         const val CHECK_MAVEN_CENTRAL_PUBLICATION = "checkMavenCentralPublication"
+        const val PUBLICATION_PREVIEW = "publicationPreview"
     }
 
     override fun apply(target: Project) {
@@ -53,6 +55,11 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 check(ext.projectUrl.isNotBlank()) { "'projectUrl' is not set. This means `mavenCentralPublish` is not configured." }
                 check(ext.connection.isNotBlank()) { "'connection' is not set. This means `mavenCentralPublish` is not configured." }
             }
+        }
+
+        target.tasks.register(PUBLICATION_PREVIEW, PublicationPreview::class.java).get().let { task ->
+            task.group = "publishing"
+            task.dependsOn(checkPublicationCredentials)
         }
 
         target.run {
@@ -195,7 +202,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 logger.warn("[MavenCentralPublish] `deploymentServerUrl` was set to `null`, so no server is being automatically set. ")
             }
 
-            if (project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null) {
+            if (project.isMpp) {
                 publications.register(name, MavenPublication::class.java) { publication ->
                     publication.run {
                         if (ext.addProjectComponents) {
@@ -204,8 +211,8 @@ class MavenCentralPublishPlugin : Plugin<Project> {
 
                         artifact(getJarTask("sources"))
                         artifact(getJarTask("javadoc"))
-                        this.groupId = groupId
-                        this.artifactId = artifactId
+                        this.groupId = ext.groupId
+                        this.artifactId = ext.artifactId
                         this.version = project.version.toString()
                         setupPom(publication, project, ext)
                         ext.publicationConfigurators.forEach {
@@ -219,14 +226,16 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     // kotlin configures `sources` for us.
                     if (publication.name != "kotlinMultiplatform") publication.artifact(getJarTask("javadoc"))
 
+                    publication.groupId = ext.groupId
+
                     setupPom(publication, project, ext)
 
                     when (val type = publication.name) {
                         "kotlinMultiplatform" -> {
-                            publication.artifactId = project.name
+                            publication.artifactId = ext.artifactId
                         }
                         "metadata", "jvm", "native", "js" -> {
-                            publication.artifactId = "${project.name}-$type"
+                            publication.artifactId = "${ext.artifactId}-$type"
                             if (publication.name.contains("js", ignoreCase = true)) {
                                 publication.artifact(getJarTask("samplessources"))
                             }
@@ -241,10 +250,21 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     val targetName = ext.publishPlatformArtifactsInRootModule
                     val publication =
                         publications.filterIsInstance<MavenPublication>()
-                            .find { it.artifactId == "${project.name}-$targetName" }
+                            .find {
+                                it.artifactId.equals(
+                                    "${ext.artifactId}-$targetName",
+                                    ignoreCase = true
+                                )
+                            } // Kotlin enforce targets to be lowercase
                             ?: error(
                                 "Could not find publication with artifactId '${project.name}-$targetName' for root module. " +
-                                        "This means the target name '$targetName' you specifdied to `publishPlatformArtifactsInRootModule` is invalid."
+                                        "This means the target name '$targetName' you specified to `publishPlatformArtifactsInRootModule` is invalid." +
+                                        "Your publishable targets: ${
+                                            publications.filterIsInstance<MavenPublication>()
+                                                .map { it.artifactId.substringAfter(ext.artifactId + "-") }
+                                                .filter { it.isNotBlank() }
+                                                .joinToString()
+                                        }"
                             )
                     publishPlatformArtifactsInRootModule(publication)
                 }
@@ -278,8 +298,10 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     }
 }
 
+internal val Project.isMpp get() = project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null
+
 private fun <T : Task> TaskContainer.getOrRegister(name: String, type: Class<T>, configurationAction: T.() -> Unit): T {
     return findByName(name)?.let { type.cast(it) } ?: register(name, type, configurationAction).get()
 }
 
-private val Project.mcExt: MavenCentralPublishExtension get() = extensions.getByType(MavenCentralPublishExtension::class.java)
+internal val Project.mcExt: MavenCentralPublishExtension get() = extensions.getByType(MavenCentralPublishExtension::class.java)

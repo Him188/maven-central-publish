@@ -95,6 +95,21 @@ open class MavenCentralPublishExtension(
     }
 
     /**
+     * Group ID for the publication.
+     */
+    var groupId: String by lazyDefault { project.group.toString() }
+
+    /**
+     * Group ID for the publication.
+     */
+    var artifactId: String by lazyDefault { project.name }
+
+    /**
+     * Version for the publication.
+     */
+    var version: String by lazyDefault { project.version.toString() }
+
+    /**
      * [MavenPom] (`pom.xml`) configurators.
      *
      * Maven Central will validate this pom, and requires the following information:
