@@ -1,5 +1,6 @@
-package net.mamoe.him188.maven.central.publish.gradle
+package net.mamoe.him188.maven.central.publish.gradle.publishing
 
+import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenFileLocations
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenSettingsProvider
