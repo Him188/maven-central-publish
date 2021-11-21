@@ -1,9 +1,9 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing
 
+import net.mamoe.him188.maven.central.publish.gradle.createTempDirSmart
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenFileLocations
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenSettingsProvider
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 abstract class AbstractPublishingTest {
@@ -11,10 +11,6 @@ abstract class AbstractPublishingTest {
         DefaultLocalMavenRepositoryLocator(DefaultMavenSettingsProvider(DefaultMavenFileLocations())).localMavenRepository
     }
 
-    @TempDir
-    lateinit var publisherDir: File
-
-    @TempDir
-    lateinit var consumerDir: File
-
+    val publisherDir: File by lazy { createTempDirSmart() }
+    val consumerDir: File by lazy { createTempDirSmart() }
 }

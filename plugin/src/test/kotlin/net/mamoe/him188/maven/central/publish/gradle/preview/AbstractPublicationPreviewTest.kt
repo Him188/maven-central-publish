@@ -1,13 +1,9 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
-import org.junit.jupiter.api.io.TempDir
+import net.mamoe.him188.maven.central.publish.gradle.createTempDirSmart
 import java.io.File
 
 abstract class AbstractPublicationPreviewTest {
-    @TempDir
-    lateinit var publisherDir: File
-
-    @TempDir
-    lateinit var consumerDir: File
-
+    val publisherDir: File by lazy { createTempDirSmart() }
+    val consumerDir: File by lazy { createTempDirSmart() }
 }

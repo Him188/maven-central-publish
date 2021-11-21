@@ -170,7 +170,7 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
         testMppConsume(packageName, group, name, version)
     }
 
-    @Disabled // TODO: 2021/8/16 this test failed
+    @Disabled
     @Test
     fun `can publish Kotlin MPP hierarchical JVM modules`() {
         val rand = Random.nextInt().absoluteValue

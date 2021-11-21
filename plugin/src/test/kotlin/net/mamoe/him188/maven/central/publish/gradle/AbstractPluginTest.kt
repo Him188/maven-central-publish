@@ -3,7 +3,6 @@ package net.mamoe.him188.maven.central.publish.gradle
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 abstract class AbstractPluginTest {
@@ -13,8 +12,7 @@ abstract class AbstractPluginTest {
                 ?: error("Cannot find credentials.txt")
     }
 
-    @TempDir
-    lateinit var tempDir: File
+    val tempDir: File by lazy { createTempDirSmart() }
 
     lateinit var buildFile: File
     lateinit var settingsFile: File
