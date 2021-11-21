@@ -86,8 +86,6 @@ gradlePlugin {
 
 kotlin.target.compilations.all {
     kotlinOptions {
-        apiVersion = "1.3"
-        languageVersion = "1.4"
         freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
         freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
         jvmTarget = "1.8"
