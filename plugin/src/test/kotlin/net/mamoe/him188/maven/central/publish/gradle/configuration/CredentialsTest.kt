@@ -32,7 +32,7 @@ class CredentialsTest : AbstractPluginTest() {
             .withArguments(
                 CHECK_PUBLICATION_CREDENTIALS,
                 "--stacktrace"
-            ).withEnvironment(mapOf("PUBLICATION.CREDENTIALS" to credentialsHex))
+            ).withEnvironment(mapOf("publication.credentials" to credentialsHex))
             .withPluginClasspath()
             .forwardOutput()
             .build()

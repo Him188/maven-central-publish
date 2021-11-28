@@ -14,6 +14,7 @@ internal object Credentials {
 
     fun findCredentials(project: Project): PublicationCredentials? {
         val info = find(project, "PUBLICATION_CREDENTIALS")
+            ?: find(project, "PUBLICATION.CREDENTIALS")
             ?: find(project, "publication.credentials")
             ?: return null
 
