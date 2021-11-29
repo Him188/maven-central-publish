@@ -1,13 +1,14 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import kotlin.test.assertEquals
 
 class MultiplatformWithPlatformModulePreviewPublicationTest : AbstractPreviewPublicationTest() {
 
-    @Test
-    fun `test Kotlin MPP with platform module in root`() {
+    @TestFactory
+    fun `test Kotlin MPP with platform module in root`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -16,15 +17,15 @@ class MultiplatformWithPlatformModulePreviewPublicationTest : AbstractPreviewPub
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
                 publishPlatformArtifactsInRootModule = "jvm"
@@ -92,8 +93,8 @@ class MultiplatformWithPlatformModulePreviewPublicationTest : AbstractPreviewPub
         }
     }
 
-    @Test
-    fun `test Kotlin MPP with multiple JVM modules, and platform module in root`() {
+    @TestFactory
+    fun `test Kotlin MPP with multiple JVM modules, and platform module in root`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -102,15 +103,15 @@ class MultiplatformWithPlatformModulePreviewPublicationTest : AbstractPreviewPub
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
                 publishPlatformArtifactsInRootModule = "jvmDesktop"

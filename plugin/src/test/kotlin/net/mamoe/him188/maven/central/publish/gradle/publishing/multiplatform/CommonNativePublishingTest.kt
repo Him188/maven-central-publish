@@ -1,17 +1,18 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.publishing.Verifier
 import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
 import net.mamoe.him188.maven.central.publish.gradle.publishing.module
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
 class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
 
-    @Test
-    fun `can publish Kotlin MPP with common native`() {
+    @TestFactory
+    fun `can publish Kotlin MPP with common native`() = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
         val groupId = "group-id-mpp-${rand}"
         val artifactId = "project-name"
@@ -32,15 +33,15 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$groupId"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -103,8 +104,8 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         testMultiplatformConsume(packageName, groupId, artifactId, version)
     }
 
-    @Test
-    fun `can publish Kotlin MPP with common native with custom project coordinates`() {
+    @TestFactory
+    fun `can publish Kotlin MPP with common native with custom project coordinates`() = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
         val originalGroup = "group-id-mpp-${rand}"
         val originalName = "project-name"
@@ -129,8 +130,8 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
@@ -140,7 +141,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
                 groupId = "$customGroup"
                 artifactId = "$customName"
                 version = "$customVersion"
-                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }

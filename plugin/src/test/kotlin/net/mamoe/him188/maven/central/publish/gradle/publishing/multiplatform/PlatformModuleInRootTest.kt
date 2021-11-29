@@ -1,15 +1,16 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
 class PlatformModuleInRootTest : AbstractMultiplatformPublishingTest() {
 
-    @Test
-    fun `can publish Kotlin MPP with common native and jvm in root module`() {
+    @TestFactory
+    fun `can publish Kotlin MPP with common native and jvm in root module`() = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
         val group = "group-id-mpp-${rand}"
         val name = "project-name"
@@ -30,15 +31,15 @@ class PlatformModuleInRootTest : AbstractMultiplatformPublishingTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
                 publishPlatformArtifactsInRootModule = "jvm" // DIFF HERE!

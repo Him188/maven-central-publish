@@ -1,17 +1,17 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
 class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
 
-    @Disabled
-    @Test
-    fun `can publish Kotlin MPP hierarchical JVM modules`() {
+    @TestFactory
+    fun `can publish Kotlin MPP hierarchical JVM modules`(): List<DynamicTest> = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
         val group = "group-id-mpp-${rand}"
         val name = "project-name"
@@ -35,26 +35,26 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
             """
             import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                kotlin("multiplatform") version "$publisherVersion"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
             }
             repositories { mavenCentral(); google() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
             kotlin {
-                jvm("android") {
-                    attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.androidJvm)
+                jvm("common") {
+                    attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.common)
                     compilations.all { kotlinOptions.jvmTarget = "1.8" }
                     testRuns["test"].executionTask.configure { useJUnit() }
                 }
-                jvm("common") {
-                    attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.common)
+                jvm("android") {
+                    attributes.attribute(KotlinPlatformType.attribute, KotlinPlatformType.androidJvm)
                     compilations.all { kotlinOptions.jvmTarget = "1.8" }
                     testRuns["test"].executionTask.configure { useJUnit() }
                 }
@@ -63,11 +63,7 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
                     testRuns["test"].executionTask.configure { useJUnit() }
                 }
                 sourceSets {
-                    val commonMain by getting {
-                        dependencies {
-                            api(kotlin("reflect"))
-                        }
-                    }
+                    val commonMain by getting
                     val androidMain by getting {
                         dependsOn(commonMain)
                         dependencies {
@@ -75,17 +71,9 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
                         }
                     }
                     val jvmMain by getting {
+                        dependsOn(commonMain)
                     }
                 }
-            }
-            afterEvaluate {
-                tasks.getByName("compileKotlinCommon").enabled = false
-                tasks.getByName("compileTestKotlinCommon").enabled = false
-        
-                tasks.getByName("compileCommonMainKotlinMetadata").enabled = false
-                tasks.getByName("compileKotlinMetadata").enabled = false
-                
-//                tasks.findByName("generateMetadataFileForKotlinMultiplatformPublication")?.enabled = false
             }
         """.trimIndent()
         )
@@ -95,12 +83,12 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
         mavenLocal(group).walk().forEach { println(it) }
 
         projectScope(group, name, version, true) {
-            verifyMetadata()
+            verifyJvm("common")
             verifyJvm("jvm")
-            verifyNative("native")
-            verifyJs("js")
-            testJvmConsume(packageName)
-            testMultiplatformConsume(packageName)
+            verifyJvm("android")
+            testJvmConsume(packageName, "$artifactId-jvm")
+            testJvmConsume(packageName, artifactId)
+            testMultiplatformJvmOnlyConsume(packageName) // The project does not target native
         }
     }
 }

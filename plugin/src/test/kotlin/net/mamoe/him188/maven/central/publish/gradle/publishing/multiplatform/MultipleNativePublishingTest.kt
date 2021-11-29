@@ -1,15 +1,17 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
 class MultipleNativePublishingTest : AbstractMultiplatformPublishingTest() {
 
-    @Test
-    fun `can publish Kotlin MPP with multiple native targets`() {
+    @TestFactory
+    fun `can publish Kotlin MPP with multiple native targets`(): List<DynamicTest> = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
         val group = "group-id-mpp-${rand}"
         val name = "project-name"
@@ -28,20 +30,21 @@ class MultipleNativePublishingTest : AbstractMultiplatformPublishingTest() {
         publisherDir.resolve("src/commonMain/kotlin/main.kt").writeText("package $packageName; \nobject Test;")
 
         publisherDir.resolve("compile-native-multiplatform.gradle").writeText(
-            Thread.currentThread().contextClassLoader.getResource("compile-native-multiplatform.gradle")!!.readText()
+            Thread.currentThread().contextClassLoader.getResource("compile-native-multiplatform.gradle")!!
+                .readText()
         )
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }

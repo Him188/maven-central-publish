@@ -14,6 +14,12 @@ abstract class AbstractPluginTest {
 
         val kotlinVersionForTests = "1.6.0"
         val gradleVersionForTests = "7.2"
+
+        val supportingKotlinVersions = listOf(
+            "1.4.31",
+            "1.5.31",
+            "1.6.0",
+        )
     }
 
     fun assertGradleTaskSuccess(dir: File, taskName: String, resultAction: BuildResultScope.() -> Unit = {}) {

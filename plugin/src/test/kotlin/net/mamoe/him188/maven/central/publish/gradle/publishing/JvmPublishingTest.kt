@@ -1,12 +1,13 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing
 
-import org.junit.jupiter.api.Test
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
+import org.junit.jupiter.api.TestFactory
 import kotlin.random.Random
 
 class JvmPublishingTest : AbstractPublishingTest() {
 
-    @Test
-    fun `can publish Kotlin JVM`() {
+    @TestFactory
+    fun `can publish Kotlin JVM`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -15,15 +16,15 @@ class JvmPublishingTest : AbstractPublishingTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("jvm") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("jvm") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -48,8 +49,8 @@ class JvmPublishingTest : AbstractPublishingTest() {
         verifyModuleJvm(group, name, version, true)
     }
 
-    @Test
-    fun `can publish Kotlin JVM with custom project coordinates`() {
+    @TestFactory
+    fun `can publish Kotlin JVM with custom project coordinates`() = createTestsForKotlinVersions {
         val rand = Random.nextInt()
         val originalGroupId = "group-id-$rand"
         val originalArtifactId = "project-name"
@@ -63,8 +64,8 @@ class JvmPublishingTest : AbstractPublishingTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("jvm") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("jvm") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."

@@ -2,6 +2,8 @@ package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
 import net.mamoe.him188.maven.central.publish.gradle.createTempDirSmart
 import net.mamoe.him188.maven.central.publish.gradle.publishing.AbstractPublishingTest
+import net.mamoe.him188.maven.central.publish.gradle.publishing.Verifier
+import net.mamoe.him188.maven.central.publish.gradle.publishing.module
 
 abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
     val configureKotlinSourceSets = "\n" + """
@@ -24,11 +26,52 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
             }
     """.trimIndent()
 
+    /**
+     * Verifies:
+     * - `.klib`
+     * - `-javadoc.jar`
+     * - `-sources.jar`
+     * - `.module`
+     * - `.pom`
+     */
+    fun verifyModuleNative(
+        groupId: String,
+        moduleName: String,
+        version: String,
+        expected: Boolean,
+        verifier: Verifier = {}
+    ) = verifyModule(groupId, moduleName, version, expected) {
+        verifier()
+        verify("$module-$version.klib")
+        verify("$module-$version-javadoc.jar")
+    }
+
+    /**
+     * Verifies:
+     * - `-samplessources.jar`
+     * - `-javadoc.jar`
+     * - `-sources.jar`
+     * - `.module`
+     * - `.pom`
+     */
+    fun verifyModuleJs(
+        groupId: String,
+        moduleName: String,
+        version: String,
+        expected: Boolean,
+        verifier: Verifier = {}
+    ) = verifyModule(groupId, moduleName, version, expected) {
+        verifier()
+        verify("$module-$version-samplessources.jar")
+        verify("$module-$version-javadoc.jar")
+    }
+
     fun testMultiplatformConsume(
         packageName: String,
         group: String,
         name: String,
-        version: String
+        version: String,
+        kotlinVersion: String = kotlinVersionForTests,
     ) {
         val consumerDir = createTempDirSmart()
         consumerDir.mkdirs()
@@ -45,7 +88,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
         consumerDir.resolve("build.gradle.kts").writeText(
             """
                 plugins {
-                    kotlin("multiplatform") version "1.5.10"
+                    kotlin("multiplatform") version "$kotlinVersion"
                 }
                 repositories { mavenCentral(); mavenLocal() }
                 $configureKotlinSourceSets
@@ -64,25 +107,45 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
         assertGradleTaskSuccess(consumerDir, "assemble")
     }
 
-    fun testJvmConsume(
+    fun testMultiplatformJvmOnlyConsume(
         packageName: String,
-        groupId: String,
-        artifactId: String,
-        version: String
+        group: String,
+        name: String,
+        version: String,
+        kotlinVersion: String = kotlinVersionForTests,
     ) {
         val consumerDir = createTempDirSmart()
         consumerDir.mkdirs()
-        consumerDir.resolve("src/main/kotlin/").mkdirs()
-        consumerDir.resolve("src/main/kotlin/main.kt")
+        consumerDir.resolve("gradle.properties").writeText(
+            """
+                kotlin.code.style=official
+                kotlin.mpp.enableGranularSourceSetsMetadata=true
+                kotlin.native.enableDependencyPropagation=false
+            """.trimIndent()
+        )
+        consumerDir.resolve("src/commonMain/kotlin/").mkdirs()
+        consumerDir.resolve("src/commonMain/kotlin/main.kt")
             .writeText("import $packageName.Test; \nfun main() { println(Test.toString()) }")
         consumerDir.resolve("build.gradle.kts").writeText(
             """
                 plugins {
-                    kotlin("jvm") version "1.5.10"
+                    kotlin("multiplatform") version "$kotlinVersion"
                 }
                 repositories { mavenCentral(); mavenLocal() }
-                dependencies {
-                    implementation("$groupId:$artifactId:$version")
+                kotlin {
+                    jvm {
+                        compilations.all { kotlinOptions.jvmTarget = "1.8" }
+                        testRuns["test"].executionTask.configure { useJUnit() }
+                    }
+                }
+                kotlin {
+                    sourceSets {
+                        val commonMain by getting {
+                             dependencies {
+                                 api("$group:$name:$version")
+                             }
+                        }
+                    }
                 }
             """.trimIndent()
         )

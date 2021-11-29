@@ -1,12 +1,13 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import kotlin.test.assertEquals
 
 class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
-    @Test
-    fun `test Kotlin JVM`() {
+    @TestFactory
+    fun `test Kotlin JVM`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -15,15 +16,15 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("jvm") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("jvm") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -54,8 +55,8 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
         }
     }
 
-    @Test
-    fun `test Kotlin JVM with custom coordinates`() {
+    @TestFactory
+    fun `test Kotlin JVM with custom coordinates`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -64,8 +65,8 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("jvm") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("jvm") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
@@ -75,7 +76,7 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
                 groupId = "custom-group-id"
                 artifactId = "custom-artifact-id"
                 version = "9.9.9"
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }

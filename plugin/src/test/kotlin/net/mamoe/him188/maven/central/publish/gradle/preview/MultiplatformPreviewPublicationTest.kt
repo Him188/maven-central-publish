@@ -1,14 +1,15 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
+import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 import kotlin.test.assertEquals
 
 class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
-    @Test
-    fun `test Kotlin MPP`() {
+    @TestFactory
+    fun `test Kotlin MPP`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -17,15 +18,15 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -84,8 +85,8 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
         }
     }
 
-    @Test
-    fun `test Kotlin MPP with multiple JVM modules`() {
+    @TestFactory
+    fun `test Kotlin MPP with multiple JVM modules`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -94,15 +95,15 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -196,8 +197,8 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
     }
 
     @EnabledOnOs(OS.MAC)
-    @Test
-    fun `test Kotlin MPP with multiple native targets`() {
+    @TestFactory
+    fun `test Kotlin MPP with multiple native targets`() = createTestsForKotlinVersions {
         val group = "group-id"
         val name = "project-name"
         val version = "1.0.0"
@@ -206,15 +207,15 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
         publisherDir.resolve("build.gradle.kts").writeText(
             """
             plugins {
-                id("net.mamoe.maven-central-publish")
-                kotlin("multiplatform") version "1.5.10"
+                id("${MavenCentralPublishPlugin.PLUGIN_ID}")
+                kotlin("multiplatform") version "$publisherVersion"
             }
             repositories { mavenCentral() }
             description = "Test project desc."
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "\\\\")}")
+                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
                 publishPlatformArtifactsInRootModule = "jvm"
