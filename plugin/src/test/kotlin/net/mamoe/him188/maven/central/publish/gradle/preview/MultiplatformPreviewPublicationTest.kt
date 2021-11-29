@@ -2,7 +2,7 @@ package net.mamoe.him188.maven.central.publish.gradle.preview
 
 import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
+import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 import kotlin.test.assertEquals
 
@@ -195,7 +195,7 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
         }
     }
 
-    @DisabledOnOs(OS.WINDOWS)
+    @EnabledOnOs(OS.MAC)
     @Test
     fun `test Kotlin MPP with multiple native targets`() {
         val group = "group-id"
