@@ -24,7 +24,7 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -76,7 +76,7 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
                 groupId = "custom-group-id"
                 artifactId = "custom-artifact-id"
                 version = "9.9.9"
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }

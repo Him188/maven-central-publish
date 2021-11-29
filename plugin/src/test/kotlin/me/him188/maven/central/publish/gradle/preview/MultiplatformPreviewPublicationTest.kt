@@ -26,7 +26,7 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -103,7 +103,7 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
@@ -215,7 +215,7 @@ class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
             group = "$group"
             version = "$version"
             mavenCentralPublish {
-                workingDir = File("${publisherDir.absolutePath.replace("\\", "/")}")
+                workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "/")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
                 publishPlatformArtifactsInRootModule = "jvm"
