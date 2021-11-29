@@ -1,10 +1,10 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
-import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
+class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
     @Test
     fun `test Kotlin JVM`() {
         val group = "group-id"
@@ -30,7 +30,7 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+        assertGradleTaskSuccess(publisherDir, PreviewPublication.TASK_NAME) {
             val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
             assertEquals(
@@ -41,8 +41,8 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
                   Version: 1.0.0
 
                 Your project targets JVM platform only.
-                Gradle users can add dependency by `implementation("group-id:project-name:1.0.0")`, provided that they have `mavenCentral()` repository declared.
-                Maven users can add dependency as the following:
+                Gradle users can add dependency by `implementation("group-id:project-name:1.0.0")`repository declared.
+                Maven users can add dependency as follows:
                 <dependency>
                     <groupId>group-id</groupId>
                     <artifactId>project-name</artifactId>
@@ -82,7 +82,7 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+        assertGradleTaskSuccess(publisherDir, PreviewPublication.TASK_NAME) {
             val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
             assertEquals(
@@ -93,8 +93,8 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
                   Version: 9.9.9
 
                 Your project targets JVM platform only.
-                Gradle users can add dependency by `implementation("custom-group-id:custom-artifact-id:9.9.9")`, provided that they have `mavenCentral()` repository declared.
-                Maven users can add dependency as the following:
+                Gradle users can add dependency by `implementation("custom-group-id:custom-artifact-id:9.9.9")`repository declared.
+                Maven users can add dependency as follows:
                 <dependency>
                     <groupId>custom-group-id</groupId>
                     <artifactId>custom-artifact-id</artifactId>

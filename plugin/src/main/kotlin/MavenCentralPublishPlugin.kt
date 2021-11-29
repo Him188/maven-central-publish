@@ -5,7 +5,7 @@ package net.mamoe.him188.maven.central.publish.gradle
 import groovy.util.Node
 import groovy.util.NodeList
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
-import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -57,7 +57,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             }
         }
 
-        target.tasks.register(PublicationPreview.TASK_NAME, PublicationPreview::class.java).get().let { task ->
+        target.tasks.register(PreviewPublication.TASK_NAME, PreviewPublication::class.java).get().let { task ->
             task.group = "publishing"
             task.dependsOn(checkPublicationCredentials)
         }

@@ -9,9 +9,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
-open class PublicationPreview : DefaultTask() {
+open class PreviewPublication : DefaultTask() {
     companion object {
-        const val TASK_NAME = "publicationPreview"
+        const val TASK_NAME = "previewPublication"
     }
 
     private val ext get() = project.mcExt
@@ -43,13 +43,13 @@ open class PublicationPreview : DefaultTask() {
 
                 appendLine(
                     """
-                        Gradle users can add dependency by `implementation("$groupId:$artifactId:$version")`, provided that they have `mavenCentral()` repository declared.
+                        Gradle users can add dependency by `implementation("$groupId:$artifactId:$version")`repository declared.
                     """.trimIndent()
                 )
 
                 appendLine(
                     """
-                        Maven users can add dependency as the following:
+                        Maven users can add dependency as follows:
                         <dependency>
                             <groupId>${ext.groupId}</groupId>
                             <artifactId>${ext.artifactId}</artifactId>
@@ -98,7 +98,7 @@ open class PublicationPreview : DefaultTask() {
                     for (target in jvmTargets) {
                         appendLine(
                             """
-                                    Maven users can add ${target.name} dependency as the following:
+                                    Maven users can add ${target.name} dependency as follows:
                                     <dependency>
                                         <groupId>${ext.groupId}</groupId>
                                         <artifactId>${ext.artifactId}-${target.name}</artifactId>
@@ -115,7 +115,7 @@ open class PublicationPreview : DefaultTask() {
                     appendLine("You have configured to publish $publishPlatformArtifactsInRootModule into root module.")
                     appendLine(
                         """
-                        ${if (jvmTargets.isNotEmpty()) "So, Maven users can also" else "So, Maven users can"} add $publishPlatformArtifactsInRootModule dependency as the following:
+                        ${if (jvmTargets.isNotEmpty()) "So, Maven users can also" else "So, Maven users can"} add $publishPlatformArtifactsInRootModule dependency as follows:
                         <dependency>
                             <groupId>${ext.groupId}</groupId>
                             <artifactId>${ext.artifactId}</artifactId>

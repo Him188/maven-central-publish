@@ -1,12 +1,12 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
-import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 import kotlin.test.assertEquals
 
-class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
+class MultiplatformPreviewPublicationTest : AbstractPreviewPublicationTest() {
     @Test
     fun `test Kotlin MPP`() {
         val group = "group-id"
@@ -49,7 +49,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+        assertGradleTaskSuccess(publisherDir, PreviewPublication.TASK_NAME) {
             val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
             assertEquals(
@@ -72,7 +72,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
             
             Maven users can only add JVM dependencies, including: jvm
             
-            Maven users can add jvm dependency as the following:
+            Maven users can add jvm dependency as follows:
             <dependency>
                 <groupId>group-id</groupId>
                 <artifactId>project-name-jvm</artifactId>
@@ -144,7 +144,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         )
 
 
-        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+        assertGradleTaskSuccess(publisherDir, PreviewPublication.TASK_NAME) {
             val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
             assertEquals(
@@ -169,21 +169,21 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
             
             Maven users can only add JVM dependencies, including: jvmAndroid, jvmBase, jvmDesktop
             
-            Maven users can add jvmAndroid dependency as the following:
+            Maven users can add jvmAndroid dependency as follows:
             <dependency>
                 <groupId>group-id</groupId>
                 <artifactId>project-name-jvmAndroid</artifactId>
                 <version>1.0.0</version>
             </dependency>
             
-            Maven users can add jvmBase dependency as the following:
+            Maven users can add jvmBase dependency as follows:
             <dependency>
                 <groupId>group-id</groupId>
                 <artifactId>project-name-jvmBase</artifactId>
                 <version>1.0.0</version>
             </dependency>
             
-            Maven users can add jvmDesktop dependency as the following:
+            Maven users can add jvmDesktop dependency as follows:
             <dependency>
                 <groupId>group-id</groupId>
                 <artifactId>project-name-jvmDesktop</artifactId>
@@ -234,7 +234,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+        assertGradleTaskSuccess(publisherDir, PreviewPublication.TASK_NAME) {
             val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
             assertEquals(
@@ -258,7 +258,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
                 
                 Maven users can only add JVM dependencies, including: jvm
                 
-                Maven users can add jvm dependency as the following:
+                Maven users can add jvm dependency as follows:
                 <dependency>
                     <groupId>group-id</groupId>
                     <artifactId>project-name-jvm</artifactId>
@@ -266,7 +266,7 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
                 </dependency>
                 
                 You have configured to publish jvm into root module.
-                So, Maven users can also add jvm dependency as the following:
+                So, Maven users can also add jvm dependency as follows:
                 <dependency>
                     <groupId>group-id</groupId>
                     <artifactId>project-name</artifactId>
