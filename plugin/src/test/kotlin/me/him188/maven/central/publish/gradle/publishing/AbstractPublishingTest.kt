@@ -121,7 +121,7 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
         expected: Boolean,
         verifier: Verifier = {}
     ) {
-        val dir = mavenLocal(groupId).resolve(moduleId).resolve(version)
+        val dir = mavenLocal(groupId).resolve(moduleId.toLowerCase()).resolve(version)
         println("Verifying: " + dir.absolutePath)
         assertEquals(expected, dir.exists(), dir.absolutePath)
 
