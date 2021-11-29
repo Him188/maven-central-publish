@@ -4,7 +4,7 @@ import me.him188.maven.central.publish.gradle.mcExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class CheckPublicationCredentials : DefaultTask() {
+open class CheckPublicationCredentials : DefaultTask() {
     companion object {
         const val TASK_NAME = "checkPublicationCredentials"
     }

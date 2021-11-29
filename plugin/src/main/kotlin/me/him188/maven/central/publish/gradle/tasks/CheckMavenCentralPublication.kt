@@ -5,7 +5,7 @@ import me.him188.maven.central.publish.gradle.mcExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
-class CheckMavenCentralPublication : DefaultTask() {
+open class CheckMavenCentralPublication : DefaultTask() {
     companion object {
         const val TASK_NAME = "checkMavenCentralPublication"
     }

@@ -6,6 +6,7 @@ import groovy.util.Node
 import groovy.util.NodeList
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
 import me.him188.maven.central.publish.gradle.tasks.CheckMavenCentralPublication
+import me.him188.maven.central.publish.gradle.tasks.CheckPublicationCredentials
 import me.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -35,8 +36,8 @@ class MavenCentralPublishPlugin : Plugin<Project> {
         )
 
         val checkPublicationCredentials = target.tasks.register(
-            CheckMavenCentralPublication.TASK_NAME,
-            CheckMavenCentralPublication::class.java
+            CheckPublicationCredentials.TASK_NAME,
+            CheckPublicationCredentials::class.java
         ) { task ->
             task.group = "publishing"
             task.description = "Check publication credentials."
