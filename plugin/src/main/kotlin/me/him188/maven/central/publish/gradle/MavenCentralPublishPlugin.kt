@@ -19,7 +19,7 @@ import org.gradle.jvm.tasks.Jar
 
 class MavenCentralPublishPlugin : Plugin<Project> {
     companion object {
-        const val PLUGIN_ID: String = "net.mamoe.maven-central-publish"
+        const val PLUGIN_ID: String = "me.him188.maven-central-publish"
         const val CHECK_PUBLICATION_CREDENTIALS = "checkPublicationCredentials"
         const val CHECK_MAVEN_CENTRAL_PUBLICATION = "checkMavenCentralPublication"
     }

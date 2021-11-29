@@ -1,6 +1,7 @@
 package me.him188.maven.central.publish.gradle.configuration
 
 import me.him188.maven.central.publish.gradle.AbstractPluginTest
+import me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class KotlinTransitiveDependenciesIntegrationTest : AbstractPluginTest() {
         dir.resolve("build.gradle").writeText(
             """
             plugins {
-                id 'net.mamoe.maven-central-publish'
+                id '${MavenCentralPublishPlugin.PLUGIN_ID}'
                 id 'org.jetbrains.kotlin.jvm' version '$userSpecifiedKotlinPluginVersion'
             }
             
