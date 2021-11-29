@@ -1,13 +1,9 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
-import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
+import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
 import org.junit.jupiter.api.Test
-import java.io.File
 import kotlin.math.absoluteValue
 import kotlin.random.Random
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class MultipleNativePublishingTest : AbstractMultiplatformPublishingTest() {
@@ -62,112 +58,44 @@ class MultipleNativePublishingTest : AbstractMultiplatformPublishingTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "build",
-                "publishToMavenLocal",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .withEnvironment(System.getenv())
-            .runCatching {
-                build()
-            }.onFailure {
-                println("Failed to publish")
-                publisherDir.walk().forEach { println(it) }
-            }.getOrThrow()
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishToMavenLocal")!!.outcome)
+        runPublishToMavenLocal()
 
-        /*
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0-javadoc.jar
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0-javadoc.jar.asc
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0-sources.jar
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0-sources.jar.asc
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.jar
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.jar.asc
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.module
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.module.asc
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom
-        C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom.asc
-         */
-        mavenLocal.resolve(group).walk().forEach { println(it) }
+        mavenLocal(group).walk().forEach { println(it) }
 
-        fun verifyModule(module: String, additional: (module: String, dir: File) -> Unit = { _, _ -> }) {
-            val dir = mavenLocal.resolve(group).resolve(module).resolve(version)
-            assertTrue(dir.exists())
-            println(dir.absolutePath)
-            assertTrue { dir.resolve("$module-$version-sources.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-sources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version.module").exists() }
-            assertTrue { dir.resolve("$module-$version.module.asc").exists() }
-            assertTrue { dir.resolve("$module-$version.pom").exists() }
-            assertTrue { dir.resolve("$module-$version.pom.asc").exists() }
-            additional(module, dir)
-        }
-        verifyModule(name) { module, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
-        }
-        verifyModule("$name-jvm") { module, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
-        fun verifyNativeModule(target: String) {
-            return verifyModule("$name-${target.toLowerCase()}") { module, dir ->
-                assertTrue { dir.resolve("$module-$version.klib").exists() }
-                assertTrue { dir.resolve("$module-$version.klib.asc").exists() }
-                assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-                assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
+        projectScope(group, name, version, true) {
+            verifyMetadata()
+            verifyJs("js")
+            verifyJvm("jvm")
+
+            val hostOs = System.getProperty("os.name")
+            when {
+                hostOs == "Mac OS X" -> {
+                    verifyNative("iosArm64")
+                    verifyNative("iosArm32")
+                    verifyNative("iosX64")
+                    verifyNative("macosX64")
+                    verifyNative("tvosArm64")
+                    verifyNative("tvosX64")
+                    verifyNative("watchosArm32")
+                    verifyNative("watchosArm64")
+                    verifyNative("watchosX86")
+
+                    verifyNative("linuxX64")
+                }
+                hostOs == "Linux" -> {
+                    verifyNative("linuxX64")
+                }
+                hostOs.startsWith("Windows") -> {
+                    verifyNative("linuxX64")
+                    verifyNative("mingwX64")
+                }
+                else -> {
+                }
             }
+
+            testJvmConsume(packageName)
+            testMultiplatformConsume(packageName)
         }
-
-        val hostOs = System.getProperty("os.name")
-        when {
-            hostOs == "Mac OS X" -> {
-                verifyNativeModule("iosArm64")
-                verifyNativeModule("iosArm32")
-                verifyNativeModule("iosX64")
-                verifyNativeModule("macosX64")
-                verifyNativeModule("tvosArm64")
-                verifyNativeModule("tvosX64")
-                verifyNativeModule("watchosArm32")
-                verifyNativeModule("watchosArm64")
-                verifyNativeModule("watchosX86")
-
-                verifyNativeModule("linuxX64")
-            }
-            hostOs == "Linux" -> {
-                verifyNativeModule("linuxX64")
-            }
-            hostOs.startsWith("Windows") -> {
-                verifyNativeModule("linuxX64")
-                verifyNativeModule("mingwX64")
-            }
-            else -> {
-            }
-        }
-
-        verifyModule("$name-js") { module, dir ->
-            assertTrue { dir.resolve("$module-$version-samplessources.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-samplessources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
-        publisherDir.deleteRecursively()
-
-
-        println("Publishing succeed.")
-
-        testJvmConsume(packageName, group, name, version)
-        testMppConsume(packageName, group, name, version)
     }
 
 }

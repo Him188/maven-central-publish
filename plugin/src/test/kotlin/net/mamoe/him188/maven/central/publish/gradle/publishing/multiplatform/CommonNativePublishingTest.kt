@@ -1,14 +1,11 @@
 package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
-import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
+import net.mamoe.him188.maven.central.publish.gradle.publishing.Verifier
+import net.mamoe.him188.maven.central.publish.gradle.publishing.mavenLocal
+import net.mamoe.him188.maven.central.publish.gradle.publishing.module
 import org.junit.jupiter.api.Test
-import java.io.File
 import kotlin.math.absoluteValue
 import kotlin.random.Random
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
@@ -16,12 +13,12 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
     @Test
     fun `can publish Kotlin MPP with common native`() {
         val rand = Random.nextInt().absoluteValue
-        val group = "group-id-mpp-${rand}"
-        val name = "project-name"
+        val groupId = "group-id-mpp-${rand}"
+        val artifactId = "project-name"
         val version = "1.0.0"
         val packageName = "test${rand}"
 
-        publisherDir.resolve("settings.gradle").writeText("""rootProject.name = "$name"""")
+        publisherDir.resolve("settings.gradle").writeText("""rootProject.name = "$artifactId"""")
         publisherDir.resolve("gradle.properties").writeText(
             """
             kotlin.code.style=official
@@ -40,7 +37,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
             }
             repositories { mavenCentral() }
             description = "Test project desc."
-            group = "$group"
+            group = "$groupId"
             version = "$version"
             mavenCentralPublish {
                 workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
@@ -51,26 +48,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "build",
-                "publishToMavenLocal",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .withEnvironment(System.getenv())
-            .runCatching {
-                build()
-            }.onFailure {
-                println("Failed to publish")
-                publisherDir.walk().forEach { println(it) }
-            }.getOrThrow()
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishToMavenLocal")!!.outcome)
+        runPublishToMavenLocal()
 
         /*
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0
@@ -85,49 +63,44 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom.asc
          */
-        mavenLocal.resolve(group).walk().forEach { println(it) }
+        mavenLocal(groupId).walk().forEach { println(it) }
 
-        fun verifyModule(module: String, additional: (module: String, dir: File) -> Unit = { _, _ -> }) {
-            val dir = mavenLocal.resolve(group).resolve(module).resolve(version)
-            assertTrue(dir.exists())
-            println(dir.absolutePath)
-            assertTrue { dir.resolve("$module-$version-sources.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-sources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version.module").exists() }
-            assertTrue { dir.resolve("$module-$version.module.asc").exists() }
-            assertTrue { dir.resolve("$module-$version.pom").exists() }
-            assertTrue { dir.resolve("$module-$version.pom.asc").exists() }
-            additional(module, dir)
+        fun verifyModule(module: String, additional: Verifier) =
+            verifyModuleMetadata(groupId, module, version, true, additional)
+
+        verifyModule(artifactId) {
+            verifyCommon()
+            verify("$module-$version.jar")
+            verify("$module-$version.jar.asc")
         }
-        verifyModule(name) { module, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
+        verifyModule("$artifactId-jvm") {
+            verifyCommon()
+            verify("$module-$version.jar")
+            verify("$module-$version.jar.asc")
+            verify("$module-$version-javadoc.jar")
+            verify("$module-$version-javadoc.jar.asc")
         }
-        verifyModule("$name-jvm") { module, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
+        verifyModule("$artifactId-native") {
+            verifyCommon()
+            verify("$module-$version.klib")
+            verify("$module-$version.klib.asc")
+            verify("$module-$version-javadoc.jar")
+            verify("$module-$version-javadoc.jar.asc")
         }
-        verifyModule("$name-native") { module, dir ->
-            assertTrue { dir.resolve("$module-$version.klib").exists() }
-            assertTrue { dir.resolve("$module-$version.klib.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
+        verifyModule("$artifactId-js") {
+            verifyCommon()
+            verify("$module-$version-samplessources.jar")
+            verify("$module-$version-samplessources.jar.asc")
+            verify("$module-$version-javadoc.jar")
+            verify("$module-$version-javadoc.jar.asc")
         }
-        verifyModule("$name-js") { module, dir ->
-            assertTrue { dir.resolve("$module-$version-samplessources.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-samplessources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
+
         publisherDir.deleteRecursively()
-
 
         println("Publishing succeed.")
 
-        testJvmConsume(packageName, group, name, version)
-        testMppConsume(packageName, group, name, version)
+        testJvmConsume(packageName, groupId, artifactId, version)
+        testMultiplatformConsume(packageName, groupId, artifactId, version)
     }
 
     @Test
@@ -164,9 +137,9 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
             group = "$originalGroup"
             version = "$originalVersion"
             mavenCentralPublish {
-                groupId = "custom-group-id"
-                artifactId = "custom-artifact-id"
-                version = "9.9.9"
+                groupId = "$customGroup"
+                artifactId = "$customName"
+                version = "$customVersion"
                 workingDir = File("${publisherDir.resolve("gpg").absolutePath.replace("\\", "\\\\")}")
                 singleDevGithubProject("Him188", "yamlkt")
                 licenseFromGitHubProject("Apache-2.0", "master")
@@ -175,26 +148,7 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "build",
-                "publishToMavenLocal",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .withEnvironment(System.getenv())
-            .runCatching {
-                build()
-            }.onFailure {
-                println("Failed to publish")
-                publisherDir.walk().forEach { println(it) }
-            }.getOrThrow()
-        assertEquals(TaskOutcome.SUCCESS, result.task(":publishToMavenLocal")!!.outcome)
+        runPublishToMavenLocal()
 
         /*
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0
@@ -209,62 +163,22 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom
         C:\Users\Him188\.m2\repository\group-id\project-name\1.0.0\project-name-1.0.0.pom.asc
          */
-        mavenLocal.resolve(customGroup).walk().forEach { println(it) }
+        mavenLocal(customGroup).walk().forEach { println(it) }
 
-        fun verifyModule(
-            module: String,
-            additional: (module: String, version: String, dir: File) -> Unit = { _, _, _ -> }
-        ) {
-            val dir = mavenLocal.resolve(customGroup).resolve(module).resolve(originalVersion)
-            assertTrue(dir.exists())
-            println(dir.absolutePath)
-
-            assertTrue { dir.resolve("$module-$originalVersion-sources.jar").exists() }
-            assertTrue { dir.resolve("$module-$originalVersion-sources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$originalVersion.module").exists() }
-            assertTrue { dir.resolve("$module-$originalVersion.module.asc").exists() }
-            assertTrue { dir.resolve("$module-$originalVersion.pom").exists() }
-            assertTrue { dir.resolve("$module-$originalVersion.pom.asc").exists() }
-
-            assertFalse { dir.resolve("$module-$originalVersion-sources.jar").exists() }
-            assertFalse { dir.resolve("$module-$originalVersion-sources.jar.asc").exists() }
-            assertFalse { dir.resolve("$module-$originalVersion.module").exists() }
-            assertFalse { dir.resolve("$module-$originalVersion.module.asc").exists() }
-            assertFalse { dir.resolve("$module-$originalVersion.pom").exists() }
-            assertFalse { dir.resolve("$module-$originalVersion.pom.asc").exists() }
-
-            additional(customName, customVersion, dir)
+        projectScope(originalGroup, originalName, originalVersion, false) {
+            verifyMetadata()
+            verifyJvm("jvm")
+            verifyJs("js")
+            verifyNative("native")
         }
 
-        verifyModule(customName) { module, version, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
+        projectScope(customGroup, customName, customVersion, true) {
+            verifyMetadata()
+            verifyJvm("jvm")
+            verifyJs("js")
+            verifyNative("native")
+            testJvmConsume(packageName)
+            testMultiplatformConsume(packageName)
         }
-        verifyModule("$customName-jvm") { module, version, dir ->
-            assertTrue { dir.resolve("$module-$version.jar").exists() }
-            assertTrue { dir.resolve("$module-$version.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
-        verifyModule("$customName-native") { module, version, dir ->
-            assertTrue { dir.resolve("$module-$version.klib").exists() }
-            assertTrue { dir.resolve("$module-$version.klib.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
-        verifyModule("$customName-js") { module, version, dir ->
-            assertTrue { dir.resolve("$module-$version-samplessources.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-samplessources.jar.asc").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar").exists() }
-            assertTrue { dir.resolve("$module-$version-javadoc.jar.asc").exists() }
-        }
-        publisherDir.deleteRecursively()
-
-
-        println("Publishing succeed.")
-
-        testJvmConsume(packageName, originalGroup, originalName, originalVersion)
-        testMppConsume(packageName, originalGroup, originalName, originalVersion)
     }
-
 }

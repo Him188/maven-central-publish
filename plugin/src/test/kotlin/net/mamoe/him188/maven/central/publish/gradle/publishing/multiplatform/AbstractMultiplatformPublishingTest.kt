@@ -2,9 +2,6 @@ package net.mamoe.him188.maven.central.publish.gradle.publishing.multiplatform
 
 import net.mamoe.him188.maven.central.publish.gradle.createTempDirSmart
 import net.mamoe.him188.maven.central.publish.gradle.publishing.AbstractPublishingTest
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
-import kotlin.test.assertEquals
 
 abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
     val configureKotlinSourceSets = "\n" + """
@@ -27,7 +24,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
             }
     """.trimIndent()
 
-    fun testMppConsume(
+    fun testMultiplatformConsume(
         packageName: String,
         group: String,
         name: String,
@@ -64,23 +61,7 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
             """.trimIndent()
         )
 
-        val result2 = GradleRunner.create()
-            .withProjectDir(consumerDir)
-            .withArguments(
-                "clean",
-                "assemble",
-                "--stacktrace",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .withEnvironment(System.getenv())
-            .runCatching {
-                build()
-            }.onFailure {
-                consumerDir.walk().forEach { println(it) }
-            }.getOrThrow()
-        assertEquals(TaskOutcome.SUCCESS, result2.task(":assemble")!!.outcome)
+        assertGradleTaskSuccess(consumerDir, "assemble")
     }
 
     fun testJvmConsume(
@@ -106,22 +87,6 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
             """.trimIndent()
         )
 
-        val result2 = GradleRunner.create()
-            .withProjectDir(consumerDir)
-            .withArguments(
-                "clean",
-                "assemble",
-                "--stacktrace",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .withEnvironment(System.getenv())
-            .runCatching {
-                build()
-            }.onFailure {
-                consumerDir.walk().forEach { println(it) }
-            }.getOrThrow()
-        assertEquals(TaskOutcome.SUCCESS, result2.task(":assemble")!!.outcome)
+        assertGradleTaskSuccess(consumerDir, "assemble")
     }
 }

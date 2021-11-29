@@ -1,7 +1,6 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
-import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
-import org.gradle.testkit.runner.GradleRunner
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -31,24 +30,11 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "publicationPreview",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+            val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
-        val message =
-            result.output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
-
-        assertEquals(
-            """
+            assertEquals(
+                """
                 Root module:
                   GroupId: group-id
                   ArtifactId: project-name
@@ -63,8 +49,9 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
                     <version>1.0.0</version>
                 </dependency>
             """.trimIndent(),
-            message
-        )
+                message
+            )
+        }
     }
 
     @Test
@@ -95,24 +82,11 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "publicationPreview",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+            val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
-        val message =
-            result.output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
-
-        assertEquals(
-            """
+            assertEquals(
+                """
                 Root module:
                   GroupId: custom-group-id
                   ArtifactId: custom-artifact-id
@@ -127,7 +101,8 @@ class JvmPublicationPreviewTest : AbstractPublicationPreviewTest() {
                     <version>9.9.9</version>
                 </dependency>
             """.trimIndent(),
-            message
-        )
+                message
+            )
+        }
     }
 }

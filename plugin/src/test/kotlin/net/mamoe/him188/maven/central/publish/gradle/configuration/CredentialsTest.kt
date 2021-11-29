@@ -1,13 +1,12 @@
 package net.mamoe.him188.maven.central.publish.gradle.configuration
 
-import net.mamoe.him188.maven.central.publish.gradle.AbstractPluginTest
 import net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin.Companion.CHECK_PUBLICATION_CREDENTIALS
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class CredentialsTest : AbstractPluginTest() {
+class CredentialsTest : AbstractPluginConfigurationTest() {
 
     @Test
     fun `provide credentials by project property`() {

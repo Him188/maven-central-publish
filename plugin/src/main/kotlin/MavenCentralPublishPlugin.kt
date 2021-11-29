@@ -19,9 +19,9 @@ import org.gradle.jvm.tasks.Jar
 
 class MavenCentralPublishPlugin : Plugin<Project> {
     companion object {
+        const val PLUGIN_ID: String = "net.mamoe.maven-central-publish"
         const val CHECK_PUBLICATION_CREDENTIALS = "checkPublicationCredentials"
         const val CHECK_MAVEN_CENTRAL_PUBLICATION = "checkMavenCentralPublication"
-        const val PUBLICATION_PREVIEW = "publicationPreview"
     }
 
     override fun apply(target: Project) {
@@ -57,7 +57,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             }
         }
 
-        target.tasks.register(PUBLICATION_PREVIEW, PublicationPreview::class.java).get().let { task ->
+        target.tasks.register(PublicationPreview.TASK_NAME, PublicationPreview::class.java).get().let { task ->
             task.group = "publishing"
             task.dependsOn(checkPublicationCredentials)
         }
@@ -227,6 +227,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     if (publication.name != "kotlinMultiplatform") publication.artifact(getJarTask("javadoc"))
 
                     publication.groupId = ext.groupId
+                    publication.version = ext.version
 
                     setupPom(publication, project, ext)
 

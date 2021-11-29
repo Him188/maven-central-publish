@@ -10,6 +10,10 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 open class PublicationPreview : DefaultTask() {
+    companion object {
+        const val TASK_NAME = "publicationPreview"
+    }
+
     private val ext get() = project.mcExt
 
     @Internal

@@ -1,7 +1,6 @@
 package net.mamoe.him188.maven.central.publish.gradle.preview
 
-import net.mamoe.him188.maven.central.publish.gradle.credentialsHex
-import org.gradle.testkit.runner.GradleRunner
+import net.mamoe.him188.maven.central.publish.gradle.tasks.PublicationPreview
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
@@ -50,24 +49,11 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "publicationPreview",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+            val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
-        val message =
-            result.output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
-
-        assertEquals(
-            """
+            assertEquals(
+                """
             Root module:
               GroupId: group-id
               ArtifactId: project-name
@@ -93,8 +79,9 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
                 <version>1.0.0</version>
             </dependency>
             """.trimIndent(),
-            message
-        )
+                message
+            )
+        }
     }
 
     @Test
@@ -156,24 +143,12 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "publicationPreview",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
 
-        val message =
-            result.output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
+        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+            val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
-        assertEquals(
-            """
+            assertEquals(
+                """
             Root module:
               GroupId: group-id
               ArtifactId: project-name
@@ -215,8 +190,9 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
                 <version>1.0.0</version>
             </dependency>
             """.trimIndent(),
-            message
-        )
+                message
+            )
+        }
     }
 
     @DisabledOnOs(OS.WINDOWS)
@@ -258,59 +234,47 @@ class MultiplatformPublicationPreviewTest : AbstractPublicationPreviewTest() {
         """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(publisherDir)
-            .withArguments(
-                "clean",
-                "publicationPreview",
-                "--stacktrace",
-                "-PPUBLICATION_CREDENTIALS=$credentialsHex",
-            )
-            .withGradleVersion("7.1")
-            .withPluginClasspath()
-            .forwardOutput()
-            .build()
+        assertGradleTaskSuccess(publisherDir, PublicationPreview.TASK_NAME) {
+            val message = output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
 
-        val message =
-            result.output.substringAfter("Publication Preview").substringBefore("Publication Preview End").trim()
-
-        assertEquals(
-            """
-            Root module:
-              GroupId: group-id
-              ArtifactId: project-name
-              Version: 1.0.0
-            
-            Your project targets multi platforms.
-            Target platforms include: js, jvm, common, linuxX64, macosX64
-            Artifact ids are: 
-            project-name-js
-            project-name-jvm
-            project-name-common
-            project-name-linuxX64
-            project-name-macosX64
-            
-            Gradle users can add multiplatform dependency in commonMain by `implementation("group-id:project-name:1.0.0")`.
-            Gradle users can also add jvm dependency by `implementation("group-id:project-name:1.0.0")`.
-            
-            Maven users can only add JVM dependencies, including: jvm
-            
-            Maven users can add jvm dependency as the following:
-            <dependency>
-                <groupId>group-id</groupId>
-                <artifactId>project-name-jvm</artifactId>
-                <version>1.0.0</version>
-            </dependency>
-            
-            You have configured to publish jvm into root module.
-            So, Maven users can also add jvm dependency as the following:
-            <dependency>
-                <groupId>group-id</groupId>
-                <artifactId>project-name</artifactId>
-                <version>1.0.0</version>
-            </dependency>
+            assertEquals(
+                """
+                Root module:
+                  GroupId: group-id
+                  ArtifactId: project-name
+                  Version: 1.0.0
+                
+                Your project targets multi platforms.
+                Target platforms include: js, jvm, common, linuxX64, macosX64
+                Artifact ids are: 
+                project-name-js
+                project-name-jvm
+                project-name-common
+                project-name-linuxX64
+                project-name-macosX64
+                
+                Gradle users can add multiplatform dependency in commonMain by `implementation("group-id:project-name:1.0.0")`.
+                Gradle users can also add jvm dependency by `implementation("group-id:project-name:1.0.0")`.
+                
+                Maven users can only add JVM dependencies, including: jvm
+                
+                Maven users can add jvm dependency as the following:
+                <dependency>
+                    <groupId>group-id</groupId>
+                    <artifactId>project-name-jvm</artifactId>
+                    <version>1.0.0</version>
+                </dependency>
+                
+                You have configured to publish jvm into root module.
+                So, Maven users can also add jvm dependency as the following:
+                <dependency>
+                    <groupId>group-id</groupId>
+                    <artifactId>project-name</artifactId>
+                    <version>1.0.0</version>
+                </dependency>
             """.trimIndent(),
-            message
-        )
+                message
+            )
+        }
     }
 }

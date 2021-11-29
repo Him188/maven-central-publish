@@ -20,7 +20,7 @@ sourceSets.main {
 kotlin {
     sourceSets.all {
         languageSettings.progressiveMode = true
-        languageSettings.useExperimentalAnnotation("kotlin.OptIn")
+        languageSettings.optIn("kotlin.OptIn")
     }
 }
 
