@@ -76,10 +76,10 @@ gradlePlugin {
     testSourceSets(sourceSets.test.get())
     plugins {
         create("MavenCentralPublish") {
-            id = "net.mamoe.maven-central-publish"
+            id = "me.him188.maven-central-publish"
             displayName = "Maven Central Publish"
             description = project.description
-            implementationClass = "net.mamoe.him188.maven.central.publish.gradle.MavenCentralPublishPlugin"
+            implementationClass = "me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin"
         }
     }
 }

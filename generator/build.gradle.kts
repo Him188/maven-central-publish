@@ -20,7 +20,7 @@ kotlin {
 
         binaries {
             executable {
-                entryPoint("net.mamoe.him188.maven.central.publish.generator.main")
+                entryPoint("me.him188.maven.central.publish.generator.main")
             }
         }
     }

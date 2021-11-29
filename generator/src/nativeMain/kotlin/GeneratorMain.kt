@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE")
 
-package net.mamoe.him188.maven.central.publish.generator
+package me.him188.maven.central.publish.generator
 
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.allocArray
@@ -8,7 +8,7 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
 import kotlinx.serialization.encodeToHexString
 import kotlinx.serialization.protobuf.ProtoBuf
-import net.mamoe.him188.maven.central.publish.protocol.PublicationCredentials
+import me.him188.maven.central.publish.protocol.PublicationCredentials
 import platform.posix.*
 
 private val SONATYPE_TXT_TIPS = """Please edit sonatype.txt following the rules:
