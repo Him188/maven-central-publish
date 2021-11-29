@@ -31,7 +31,6 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
      * - `.klib`
      * - `-javadoc.jar`
      * - `-sources.jar`
-     * - `-metadata.jar`
      * - `.module`
      * - `.pom`
      */
@@ -40,13 +39,11 @@ abstract class AbstractMultiplatformPublishingTest : AbstractPublishingTest() {
         moduleName: String,
         version: String,
         expected: Boolean,
-        withMetadata: Boolean = true,
         verifier: Verifier = {}
     ) = verifyModule(groupId, moduleName, version, expected) {
         verifier()
         verify("$module-$version.klib")
         verify("$module-$version-javadoc.jar")
-        if (withMetadata) verify("$module-$version-metadata.jar")
     }
 
     /**

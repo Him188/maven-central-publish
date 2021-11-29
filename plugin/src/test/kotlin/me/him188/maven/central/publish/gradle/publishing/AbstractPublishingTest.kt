@@ -63,7 +63,7 @@ class ProjectScope(
         targetName: String,
         withMetadata: Boolean = true,
         verifier: Verifier = {}
-    ) = verifyModuleNative(groupId, "${artifactId}-$targetName", version, expected, withMetadata, verifier)
+    ) = verifyModuleNative(groupId, "${artifactId}-$targetName", version, expected, verifier)
 
     fun AbstractMultiplatformPublishingTest.verifyJs(
         targetName: String,
