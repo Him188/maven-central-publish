@@ -5,12 +5,14 @@ import me.him188.maven.central.publish.gradle.AbstractPluginTest.Companion.kotli
 import me.him188.maven.central.publish.gradle.createTempDirSmart
 import me.him188.maven.central.publish.gradle.publishing.multiplatform.AbstractMultiplatformPublishingTest
 import me.him188.maven.central.publish.gradle.registerDeleteHook
+import me.him188.maven.central.publish.gradle.testFramework.MavenRunner
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenFileLocations
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenSettingsProvider
 import org.junit.jupiter.api.DynamicTest
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class VerifierScope(
     val groupId: String,
@@ -95,8 +97,7 @@ val VerifierScope.module get() = artifactId
 
 typealias Verifier = VerifierScope.() -> Unit
 
-
-private val mavenLocalDir: File by lazy {
+val mavenLocalDir: File by lazy {
     DefaultLocalMavenRepositoryLocator(DefaultMavenSettingsProvider(DefaultMavenFileLocations())).localMavenRepository
 }
 
@@ -195,6 +196,8 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
     ) {
         val consumerDir = createTempDirSmart()
         consumerDir.mkdirs()
+        consumerDir.resolve("gradle.properties").writeText("\n")
+        consumerDir.resolve("settings.gradle.kts").writeText("rootProject.name = \"test\"")
         consumerDir.resolve("src/main/kotlin/").mkdirs()
         consumerDir.resolve("src/main/kotlin/main.kt")
             .writeText("import $packageName.Test; \nfun main() { println(Test.toString()) }")
@@ -209,8 +212,28 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
                 }
             """.trimIndent()
         )
-
         assertGradleTaskSuccess(consumerDir, "assemble")
+
+        val mavenDir = createTempDirSmart()
+        mavenDir.mkdirs()
+        mavenDir.resolve("src/main/java/test/").mkdirs()
+        mavenDir.resolve("src/main/java/test/Main.java")
+            .writeText(
+                """
+                    package test;
+                    import $packageName.Test; 
+                    public class Main {
+                        public static void main(String[] args) { 
+                            System.out.println(Test.INSTANCE.toString());
+                        }
+                    }
+                """.trimIndent()
+            )
+
+        MavenRunner.runMaven(mavenDir, kotlinVersion, "package") {
+            addDependency(groupId, artifactId, version)
+        }
+        assertTrue { mavenDir.resolve("target/classes/test/Main.class").exists() }
     }
 
 
