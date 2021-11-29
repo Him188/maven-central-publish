@@ -3,7 +3,6 @@ package me.him188.maven.central.publish.gradle.configuration
 import me.him188.maven.central.publish.gradle.AbstractPluginTest
 import me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import me.him188.maven.central.publish.gradle.createTempDirSmart
-import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.BeforeEach
 import java.io.File
 
@@ -14,14 +13,6 @@ abstract class AbstractPluginConfigurationTest : AbstractPluginTest() {
     lateinit var settingsFile: File
     lateinit var propertiesFile: File
 
-
-    fun gradleRunner(): GradleRunner? {
-        return GradleRunner.create()
-            .withProjectDir(tempDir)
-            .withGradleVersion(gradleVersionForTests)
-            .withPluginClasspath()
-            .forwardOutput()
-    }
 
     @BeforeEach
     fun setup() {

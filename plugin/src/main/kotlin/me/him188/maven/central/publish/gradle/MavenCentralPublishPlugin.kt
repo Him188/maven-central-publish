@@ -5,6 +5,7 @@ package me.him188.maven.central.publish.gradle
 import groovy.util.Node
 import groovy.util.NodeList
 import io.github.karlatemp.publicationsign.PublicationSignPlugin
+import me.him188.maven.central.publish.gradle.tasks.CheckMavenCentralPublication
 import me.him188.maven.central.publish.gradle.tasks.PreviewPublication
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,8 +21,6 @@ import org.gradle.jvm.tasks.Jar
 class MavenCentralPublishPlugin : Plugin<Project> {
     companion object {
         const val PLUGIN_ID: String = "me.him188.maven-central-publish"
-        const val CHECK_PUBLICATION_CREDENTIALS = "checkPublicationCredentials"
-        const val CHECK_MAVEN_CENTRAL_PUBLICATION = "checkMavenCentralPublication"
     }
 
     override fun apply(target: Project) {
@@ -35,29 +34,27 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             target
         )
 
-        val checkPublicationCredentials = target.tasks.register(CHECK_PUBLICATION_CREDENTIALS) { task ->
+        val checkPublicationCredentials = target.tasks.register(
+            CheckMavenCentralPublication.TASK_NAME,
+            CheckMavenCentralPublication::class.java
+        ) { task ->
             task.group = "publishing"
             task.description = "Check publication credentials."
-            task.doLast {
-                val ext = task.project.mcExt
-                val credentials = ext.credentials ?: error("No Publication credentials were set.")
-
-                Credentials.check(credentials)
-            }
         }
 
-        target.tasks.register(CHECK_MAVEN_CENTRAL_PUBLICATION) { task ->
+        target.tasks.register(
+            CheckMavenCentralPublication.TASK_NAME,
+            CheckMavenCentralPublication::class.java
+        ) { task ->
             task.group = "publishing"
             task.description = "Check whether information required to maven central publication is provided.."
             task.dependsOn(checkPublicationCredentials)
-            task.doLast {
-                val ext = task.project.mcExt
-                check(ext.projectUrl.isNotBlank()) { "'projectUrl' is not set. This means `mavenCentralPublish` is not configured." }
-                check(ext.connection.isNotBlank()) { "'connection' is not set. This means `mavenCentralPublish` is not configured." }
-            }
         }
 
-        target.tasks.register(PreviewPublication.TASK_NAME, PreviewPublication::class.java).get().let { task ->
+        target.tasks.register(
+            PreviewPublication.TASK_NAME,
+            PreviewPublication::class.java
+        ) { task ->
             task.group = "publishing"
             task.dependsOn(checkPublicationCredentials)
         }

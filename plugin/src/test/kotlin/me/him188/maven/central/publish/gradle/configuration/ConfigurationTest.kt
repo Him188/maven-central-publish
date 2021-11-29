@@ -1,6 +1,6 @@
 package me.him188.maven.central.publish.gradle.configuration
 
-import me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin.Companion.CHECK_MAVEN_CENTRAL_PUBLICATION
+import me.him188.maven.central.publish.gradle.tasks.CheckMavenCentralPublication
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
@@ -17,7 +17,7 @@ class ConfigurationTest : AbstractPluginConfigurationTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskOutcome(tempDir, CHECK_MAVEN_CENTRAL_PUBLICATION, TaskOutcome.FAILED) {
+        assertGradleTaskOutcome(tempDir, CheckMavenCentralPublication.TASK_NAME, TaskOutcome.FAILED) {
             assertTrue { output.contains("'projectUrl' is not set") }
         }
     }
@@ -32,7 +32,7 @@ class ConfigurationTest : AbstractPluginConfigurationTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskOutcome(tempDir, CHECK_MAVEN_CENTRAL_PUBLICATION, TaskOutcome.FAILED) {
+        assertGradleTaskOutcome(tempDir, CheckMavenCentralPublication.TASK_NAME, TaskOutcome.FAILED) {
             assertTrue { output.contains("'connection' is not set") }
         }
     }
@@ -48,6 +48,6 @@ class ConfigurationTest : AbstractPluginConfigurationTest() {
         """.trimIndent()
         )
 
-        assertGradleTaskSuccess(tempDir, CHECK_MAVEN_CENTRAL_PUBLICATION)
+        assertGradleTaskSuccess(tempDir, CheckMavenCentralPublication.TASK_NAME)
     }
 }
