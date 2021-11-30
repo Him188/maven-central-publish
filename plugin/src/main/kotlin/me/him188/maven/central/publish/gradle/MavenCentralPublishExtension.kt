@@ -35,18 +35,26 @@ open class MavenCentralPublishExtension(
     var credentials: PublicationCredentials? = kotlin.runCatching { Credentials.findCredentials(project) }.getOrNull()
 
     /**
-     * Working dir. If you got errors about 'directory too long', please change this.
+     * Working dir. Please make it as short as it can, since the Signer has some embedded mechanism to detect the length of its filepath.¬
      *
-     * When system environment `PUBLICATION_USE_SYSTEM_TEMP` is set to `true`, `/temp/publication-temp/` is used.
+     * The plugin will create a security file "KEEP_THIS_DIR_EMPTY.txt" into this directory.
+     * All files in this dir will be deleted everytime the plugin is signing your artifact, provided that the security file exists.
+     *
+     * If [workingDir] is not empty and the security file does not exist, which means the directory is used for other purposes,
+     * the plugin will throw an exception and will not delete anything.
+     *
+     * When system environment `publication.use.system.temp` is set to `true`, this will be set to `Files.createTempDirectory("publishing-tmp")`
      */
     var workingDir: File =
-        if (System.getenv("PUBLICATION_USE_SYSTEM_TEMP")?.toBoolean() == true) {
+        if (System.getenv("publication.use.system.temp")?.toBoolean() == true
+            || System.getenv("PUBLICATION_USE_SYSTEM_TEMP")?.toBoolean() == true
+        ) {
             try {
-                Files.createTempDirectory("pub-temp").toFile()
+                Files.createTempDirectory("publishing-tmp").toFile()
             } catch (e: IOException) {
-                project.buildDir.resolve("keys")
+                project.buildDir.resolve("publishing-tmp")
             }
-        } else project.buildDir.resolve("keys")
+        } else project.buildDir.resolve("publishing-tmp")
 
     /**
      * Set which server is to access to.

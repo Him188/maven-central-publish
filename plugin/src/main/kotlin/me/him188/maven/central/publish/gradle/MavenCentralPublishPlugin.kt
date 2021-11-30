@@ -12,16 +12,63 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.XmlProvider
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.jvm.tasks.Jar
+import java.io.File
 
 
 class MavenCentralPublishPlugin : Plugin<Project> {
     companion object {
         const val PLUGIN_ID: String = "me.him188.maven-central-publish"
+
+        inline fun Project.log(message: () -> String) {
+            if (logger.isInfoEnabled) {
+                logger.info("[MavenCentralPublish] " + message())
+            }
+        }
+
+        inline fun Project.log(level: LogLevel, message: () -> String) {
+            if (logger.isInfoEnabled) {
+                logger.log(level, "[MavenCentralPublish] " + message())
+            }
+        }
+
+        const val SECURITY_FILE_NAME = "KEEP_THIS_DIR_EMPTY.txt"
+
+        fun checkSecurityFile(workingDir: File) {
+            val securityFile = workingDir.resolve(SECURITY_FILE_NAME)
+            if (workingDir.exists()) {
+                if (securityFile.exists()) {
+                    // ok
+                } else {
+                    when (workingDir.listFiles()?.isEmpty()) {
+                        null -> error("Working dir '${workingDir}' is not a directory. Please change in `mavenCentralPublish.workingDir`")
+                        false -> error("Working dir '${workingDir}' is not empty. Please change in `mavenCentralPublish.workingDir`")
+                        true -> {}
+                    }
+                }
+            } else {
+                // ok
+            }
+            workingDir.mkdirs()
+            securityFile.writeText(
+                """
+                        This file is created by the Gradle plugin '$PLUGIN_ID', and this directory is reserved for publication. 
+                        
+                        Everytime signing artifacts, all files in this directory will be removed without notice.
+                        Do not put any files into this directory, or use this directory for any other purposes, otherwise they will be deleted as stated above!
+                        
+                        If you are not using this directory for publication (i.e. when you changed the `workingDir`), you can delete this file.
+                        Without the existence of this security file, the plugin won't remove anything and will give you an error on startup.
+                        """
+                    .trimIndent()
+            )
+        }
+
     }
 
     override fun apply(target: Project) {
@@ -64,18 +111,20 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             afterEvaluate {
                 val ext = target.mcExt
                 val credentials = ext.credentials ?: kotlin.run {
-                    logger.warn("[MavenCentralPublish] No credentials were set.")
+                    log(LogLevel.WARN) { "No credentials were set. Publication will not be configured." }
                     return@afterEvaluate
                 }
 
-                project.logger.info("[MavenCentralPublish] credentials: length=${credentials.toString().length}")
+                log { "credentials: length=${credentials.toString().length}" }
 
-                project.logger.info("[MavenCentralPublish] workingDir=${ext.workingDir.absolutePath}")
+                log { "workingDir=${ext.workingDir.absolutePath}" }
 
-                project.logger.info("[MavenCentralPublish] Writing public key len=${credentials.pgpPublicKey.length} to \$workingDir/keys/key.pub.")
-                project.logger.info("[MavenCentralPublish] Writing private key len=${credentials.pgpPrivateKey.length} to \$workingDir/keys/key.pri.")
+                log { "Writing public key len=${credentials.pgpPublicKey.length} to \$workingDir/keys/key.pub." }
+                log { "Writing private key len=${credentials.pgpPrivateKey.length} to \$workingDir/keys/key.pri." }
 
-                val keysDir = ext.workingDir
+                val workingDir = ext.workingDir
+                val keysDir = workingDir.resolve("keys")
+                checkSecurityFile(workingDir)
 
                 keysDir.run {
                     deleteRecursively() // clear caches
