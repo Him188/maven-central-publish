@@ -24,7 +24,7 @@ open class MavenCentralPublishExtension(
     project: Project,
 ) {
     ///////////////////////////////////////////////////////////////////////////
-    // Credentials
+    // Credentials, Plugin Configuration, Servers
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -77,7 +77,7 @@ open class MavenCentralPublishExtension(
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Project
+    // Project Coordinates
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -143,26 +143,34 @@ open class MavenCentralPublishExtension(
     /**
      * [MavenPublication] configurators.
      *
-     * This plugin registers a *publication* named `MavenCentral` for Java and Kotlin single target projects and configures.
+     * This plugin registers a *publication* named `MavenCentral` for Java and Kotlin single target projects.
+     * For Kotlin MPP, this will be done by the Kotlin plugin.
      *
-     * For Kotlin MPP, each target is accompanied with a *publication*, configured with platform-specific source roots.
+     * Each configurator in [publicationConfigurators] will be executed to the *publication* after the invocation of the above configuration,
+     * although maybe before shadowed artifact is added.
+     * You can add more artifacts via [MavenPublication.from] or [MavenPublication.artifact],
+     * but removing artifacts is not supported as all the ones preconfigured for you are required by the Maven Central validator.
      *
-     * The *publication* will contain these artifacts:
+     * ## Files in each publication
+     *
+     * Usually you don't need to care about this.
+     *
+     * For Kotlin MPP, each target is accompanied by a *publication*, configured with platform-specific source roots.
+     *
+     * Each *publication* will contain at least these artifacts:
      * - project-name.pom  // contains information configured by [pomConfigurators]
      * - project-name.jar  // compiled, output jar
      * - project-name-sources.jar  // source code, usually from `src/main/java` and `src/main/kotlin`.
      *                                For Kotlin MPP, it is `src/xxxMain/kotlin` plus all its dependant source sets.
      * - project-name-javadoc.jar  // javadoc for this
      *
+     * For native targets targeting macOS or Windows, there may be additionally 'project-name-metadata.jar' created by the Kotlin plugin.
+     *
+     * ### Using shadow plugin
+     *
      * If you applied shadow-plugin (`com.github.johnrengelman.shadow`), there will be another artifact named `project-name-all.jar`.
      *
      * Additionally, each file is signed with your [PublicationCredentials.pgpPrivateKey] in [credentials].
-     *
-     *
-     * Each configurator in [publicationConfigurators] will be executed to the *publication* after the invocation of the above configuration,
-     * although maybe before shadowed artifact is added.
-     * You can add more artifacts via [MavenPublication.from] or [MavenPublication.artifact],
-     * but removing artifacts is not supported as all the ones preconfigured for you are required by the Maven Central validator.
      */
     val publicationConfigurators: MutableList<Action<MavenPublication>> = mutableListOf()
 
@@ -186,7 +194,7 @@ open class MavenCentralPublishExtension(
     /**
      * The target name to be published also in root module. Example value: `"jvm"`.
      *
-     * This enables Kotlin Multiplatform Projects to be resolved by consumers who has no access to Gradle Metadata (e.g., Maven users).
+     * This enables Kotlin Multiplatform Projects to be resolved by consumers who have no access to Gradle Metadata (e.g., Maven users).
      */
     var publishPlatformArtifactsInRootModule: String? = null
 
