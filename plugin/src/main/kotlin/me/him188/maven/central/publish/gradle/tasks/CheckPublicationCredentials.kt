@@ -12,7 +12,6 @@ open class CheckPublicationCredentials : DefaultTask() {
     @TaskAction
     fun run() {
         val ext = project.mcExt
-        check(ext.projectUrl.isNotBlank()) { "'projectUrl' is not set. This means `mavenCentralPublish` is not configured." }
-        check(ext.connection.isNotBlank()) { "'connection' is not set. This means `mavenCentralPublish` is not configured." }
+        ext.credentials ?: error("No Publication credentials were set.")
     }
 }
