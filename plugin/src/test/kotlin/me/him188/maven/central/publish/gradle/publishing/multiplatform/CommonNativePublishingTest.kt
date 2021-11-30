@@ -72,28 +72,21 @@ class CommonNativePublishingTest : AbstractMultiplatformPublishingTest() {
         verifyModule(artifactId) {
             verifyCommon()
             verify("$module-$version.jar")
-            verify("$module-$version.jar.asc")
         }
         verifyModule("$artifactId-jvm") {
             verifyCommon()
             verify("$module-$version.jar")
-            verify("$module-$version.jar.asc")
             verify("$module-$version-javadoc.jar")
-            verify("$module-$version-javadoc.jar.asc")
         }
         verifyModule("$artifactId-native") {
             verifyCommon()
             verify("$module-$version.klib")
-            verify("$module-$version.klib.asc")
             verify("$module-$version-javadoc.jar")
-            verify("$module-$version-javadoc.jar.asc")
         }
         verifyModule("$artifactId-js") {
             verifyCommon()
             verify("$module-$version-samplessources.jar")
-            verify("$module-$version-samplessources.jar.asc")
             verify("$module-$version-javadoc.jar")
-            verify("$module-$version-javadoc.jar.asc")
         }
 
         publisherDir.deleteRecursively()
