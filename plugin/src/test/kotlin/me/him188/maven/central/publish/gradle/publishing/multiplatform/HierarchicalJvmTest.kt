@@ -172,6 +172,7 @@ class HierarchicalJvmTest : AbstractMultiplatformPublishingTest() {
                 verifyJvm("android")
                 testJvmConsume(packageName, "$artifactId-jvm")
                 testJvmConsume(packageName, artifactId)
+                testMavenConsume(packageName)
                 testMultiplatformJvmOnlyConsume(packageName) // The project does not target native
             }
         }

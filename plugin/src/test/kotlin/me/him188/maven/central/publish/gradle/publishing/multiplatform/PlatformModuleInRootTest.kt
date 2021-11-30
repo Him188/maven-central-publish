@@ -58,8 +58,7 @@ class PlatformModuleInRootTest : AbstractMultiplatformPublishingTest() {
 
             testJvmConsume(packageName)
             testMultiplatformConsume(packageName)
-
-            // TODO: 2021/7/1 Test for maven consumers
+            testMavenConsume(packageName)
         }
     }
 }

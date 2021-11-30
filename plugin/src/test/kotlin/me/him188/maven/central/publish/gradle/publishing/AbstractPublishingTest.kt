@@ -78,6 +78,14 @@ class ProjectScope(
         testJvmConsume(packageName, groupId, artifactId, version, kotlinVersion)
     }
 
+    fun AbstractMultiplatformPublishingTest.testMavenConsume(
+        packageName: String,
+        artifactId: String = this@ProjectScope.artifactId,
+        kotlinVersion: String = kotlinVersionsScope?.consumerVersion ?: kotlinVersionForTests
+    ) {
+        testMavenConsume(packageName, groupId, artifactId, version, kotlinVersion)
+    }
+
     fun AbstractMultiplatformPublishingTest.testMultiplatformConsume(
         packageName: String,
         kotlinVersion: String = kotlinVersionsScope?.consumerVersion ?: kotlinVersionForTests
@@ -213,7 +221,15 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
             """.trimIndent()
         )
         assertGradleTaskSuccess(consumerDir, "assemble")
+    }
 
+    fun testMavenConsume(
+        packageName: String,
+        groupId: String,
+        artifactId: String,
+        version: String,
+        kotlinVersion: String = kotlinVersionForTests,
+    ) {
         val mavenDir = createTempDirSmart()
         mavenDir.mkdirs()
         mavenDir.resolve("src/main/java/test/").mkdirs()

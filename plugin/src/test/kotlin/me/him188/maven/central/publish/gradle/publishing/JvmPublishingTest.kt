@@ -4,6 +4,7 @@ import me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin
 import org.junit.jupiter.api.TestFactory
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
 class JvmPublishingTest : AbstractPublishingTest() {
@@ -59,6 +60,7 @@ class JvmPublishingTest : AbstractPublishingTest() {
 
 
         testJvmConsume(packageName, group, name, version, consumerVersion)
+        testMavenConsume(packageName, group, name, version, consumerVersion)
     }
 
     @TestFactory
@@ -106,5 +108,13 @@ class JvmPublishingTest : AbstractPublishingTest() {
         verifyModuleJvm(customGroupId, customArtifactId, customVersion, true)
 
         testJvmConsume(packageName, customGroupId, customArtifactId, customVersion, consumerVersion)
+        testMavenConsume(packageName, customGroupId, customArtifactId, customVersion, consumerVersion)
+
+        assertFails {
+            testJvmConsume(packageName, originalGroupId, originalArtifactId, originalVersion, consumerVersion)
+        }
+        assertFails {
+            testMavenConsume(packageName, originalGroupId, originalArtifactId, originalVersion, consumerVersion)
+        }
     }
 }
