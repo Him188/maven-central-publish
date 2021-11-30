@@ -134,7 +134,7 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
         println("Verifying: " + dir.absolutePath)
         assertEquals(expected, dir.exists(), dir.absolutePath)
 
-        val scope = VerifierScope(groupId, moduleId, version, dir, expected)
+        val scope = VerifierScope(groupId.toLowerCase(), moduleId.toLowerCase(), version, dir, expected)
 
         scope.verifier()
         scope.verifyCommon()
