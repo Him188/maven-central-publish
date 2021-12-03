@@ -118,12 +118,9 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
     fun runPublishToMavenLocal() = assertGradleTaskSuccess(publisherDir, "publishToMavenLocal")
 
     /**
-     * Verifies:
-     * - `-sources.jar`
-     * - `.module`
-     * - `.pom`
+     * Verifies nothing but invoke [verifier]
      */
-    fun verifyModule(
+    fun verifyBase(
         groupId: String,
         moduleId: String,
         version: String,
@@ -137,7 +134,25 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
         val scope = VerifierScope(groupId.toLowerCase(), moduleId.toLowerCase(), version, dir, expected)
 
         scope.verifier()
-        scope.verifyCommon()
+    }
+
+    /**
+     * Verifies:
+     * - `-sources.jar`
+     * - `.module`
+     * - `.pom`
+     */
+    fun verifyModule(
+        groupId: String,
+        moduleId: String,
+        version: String,
+        expected: Boolean,
+        verifier: Verifier = {}
+    ) {
+        verifyBase(groupId, moduleId, version, expected) {
+            verifier()
+            verifyCommon()
+        }
     }
 
     /**

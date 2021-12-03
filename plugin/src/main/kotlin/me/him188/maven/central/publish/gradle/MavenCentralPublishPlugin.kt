@@ -255,12 +255,10 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             if (!project.isMpp) {
                 publications.register(name, MavenPublication::class.java) { publication ->
                     publication.run {
-                        if (ext.addProjectComponents) {
-                            from(components.getByName("java"))
-                        }
+                        if (ext.addProjectComponents) from(components.getByName("java"))
+                        if (ext.addSources) artifact(getJarTask("sources"))
+                        if (ext.addJavadoc) artifact(getJarTask("javadoc"))
 
-                        artifact(getJarTask("sources"))
-                        artifact(getJarTask("javadoc"))
                         this.groupId = ext.groupId
                         this.artifactId = ext.artifactId
                         this.version = ext.version
@@ -274,7 +272,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
             } else {
                 publications.filterIsInstance<MavenPublication>().forEach { publication ->
                     // kotlin configures `sources` for us.
-                    if (publication.name != "kotlinMultiplatform") publication.artifact(getJarTask("javadoc"))
+                    if (publication.name != "kotlinMultiplatform") {
+                        if (ext.addJavadoc) publication.artifact(getJarTask("javadoc"))
+                    }
 
                     publication.groupId = ext.groupId
                     publication.version = ext.version
@@ -288,7 +288,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                         "metadata", "jvm", "native", "js" -> {
                             publication.artifactId = "${ext.artifactId}-$type"
                             if (publication.name.contains("js", ignoreCase = true)) {
-                                publication.artifact(getJarTask("samplessources"))
+                                if (ext.addSources) publication.artifact(getJarTask("samplessources"))
                             }
                         }
                         else -> {

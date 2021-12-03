@@ -203,9 +203,41 @@ open class MavenCentralPublishExtension(
      * If `true`, the component `project.components["java"]` will be added.
      * Such component usually contains a binary jar that is compiled from your source code at `src/main/`.
      *
+     * This feature is only available for JVM projects. Kotlin multiplatform projects always have default project components.
+     *
      * @see publicationConfigurators
      */
     var addProjectComponents: Boolean = true
+
+    /**
+     * Controls the '-sources.jar' and the '-samplessources.jar'.
+     *
+     * ## For Kotlin JVM
+     *
+     * If this is `true`, the plugin will automatically add a generated '-sources.jar' from all sources from sourceSets ending with "main".
+     *
+     * Otherwise, it will not be added. However, Maven Central requires a '-sources.jar' to exist, so you may need to manually add one.
+     *
+     * ## For Kotlin MPP
+     *
+     * For Kotlin MPP, this controls the '-samplessources.jar' for the JS targets.
+     * This JAR is required by Kotlin on the consumer's side, so the plugin creates, by default, one from all sources from sourceSets ending with "test".
+     * You can disable it and add your onw one.
+     *
+     * The '-sources.jar' is added by the Kotlin multiplatform plugin, so it will not be removed by setting [addSources] to `false`.
+     *
+     * @see publicationConfigurators
+     */
+    var addSources: Boolean = true
+
+    /**
+     * If `true`, add automatically generated '-javadoc' JAR from all sources from the 'main' compilation.
+     *
+     * Otherwise, it will not be added. However, Maven Central requires a '-javadoc' JAR to exist, so you may need to manually add one.
+     *
+     * @see publicationConfigurators
+     */
+    var addJavadoc: Boolean = true
 
     /**
      * The target name to be published also in root module. Example value: `"jvm"`.

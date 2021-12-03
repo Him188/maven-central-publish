@@ -1,5 +1,6 @@
 package me.him188.maven.central.publish.gradle.tasks
 
+import me.him188.maven.central.publish.gradle.MavenCentralPublishExtension
 import me.him188.maven.central.publish.gradle.mcExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.publish.PublishingExtension
@@ -15,7 +16,7 @@ open class PreviewPublication : DefaultTask() {
     companion object {
         const val TASK_NAME = "previewPublication"
 
-        val knownExtensionAndClassifiers = listOf(
+        val knownExtensionAndClassifiers: List<Pair<String, String?>> = listOf(
             "jar" to "javadoc",
             "jar" to "samplessources",
             "jar" to "sources",
@@ -48,17 +49,57 @@ open class PreviewPublication : DefaultTask() {
             )
             appendLine()
 
-            project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.let {
-                appendLine("Your project targets JVM platform only.")
+            appendProjectComponentsInfo(ext)
+            appendExtraFilesInfo(ext)
 
-                appendLine(
-                    """
+            appendLine("Publication Preview End")
+        }
+    }
+
+    private fun StringBuilder.appendExtraFilesInfo(ext: MavenCentralPublishExtension): Unit = ext.run {
+        val unknownArtifacts = getUnknownArtifacts(if (addProjectComponents) knownExtensionAndClassifiers else listOf())
+        if (!unknownArtifacts.all { it.second.isEmpty() }) {
+            appendLine()
+            if (addProjectComponents) {
+                appendLine("There are some extra files that are going to be published:")
+            } else {
+                appendLine("The files to be published:")
+            }
+            appendLine()
+            for ((publication, files) in unknownArtifacts) {
+                appendLine("[${publicationNameToPlatformName(publication.name)}]")
+                for (artifact in files) {
+                    appendLine(artifact.render())
+                }
+                appendLine()
+            }
+        }
+    }
+
+    private fun publicationNameToPlatformName(name: String) = when (name) {
+        "kotlinMultiplatform" -> "common"
+        "metadata" -> "common"
+        "mavenCentral" -> "jvm"
+        else -> name
+    }
+
+    private fun StringBuilder.appendProjectComponentsInfo(ext: MavenCentralPublishExtension): Unit = ext.run {
+        if (!addProjectComponents) {
+            appendLine("`addProjectComponents` was set to `false`, so no project files will be added by default.")
+            return
+        }
+
+        project.extensions.findByType(KotlinJvmProjectExtension::class.java)?.let {
+            appendLine("Your project targets JVM platform only.")
+
+            appendLine(
+                """
                         Gradle users can add dependency by `implementation("$groupId:$artifactId:$version")`.
                     """.trimIndent()
-                )
+            )
 
-                appendLine(
-                    """
+            appendLine(
+                """
                         Maven users can add dependency as follows:
                         <dependency>
                             <groupId>${ext.groupId}</groupId>
@@ -66,49 +107,42 @@ open class PreviewPublication : DefaultTask() {
                             <version>${ext.version}</version>
                         </dependency>
                     """.trimIndent()
-                )
+            )
+        }
+
+        project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.let { kotlin ->
+            appendLine("Your project targets multi platforms.")
+            val publications = project.extensions.findByType(PublishingExtension::class.java)?.publications
+            if (publications == null) {
+                appendLine("Internal Error: failed to find PublishingExtension.")
+                return@let
+            }
+            appendLine("Target platforms include: " + publications.joinToString { publicationNameToPlatformName(it.name) })
+            appendLine("Artifact ids are: ")
+            for (target in publications) {
+                appendLine("${ext.artifactId}-${publicationNameToPlatformName(target.name)}")
             }
 
-            fun publicationNameToPlatformName(name: String) = when (name) {
-                "kotlinMultiplatform" -> "common"
-                "metadata" -> "common"
-                "mavenCentral" -> "jvm"
-                else -> name
-            }
+            appendLine()
 
-            project.extensions.findByType(KotlinMultiplatformExtension::class.java)?.let { kotlin ->
-                appendLine("Your project targets multi platforms.")
-                val publications = project.extensions.findByType(PublishingExtension::class.java)?.publications
-                if (publications == null) {
-                    appendLine("Internal Error: failed to find PublishingExtension.")
-                    return@let
-                }
-                appendLine("Target platforms include: " + publications.joinToString { publicationNameToPlatformName(it.name) })
-                appendLine("Artifact ids are: ")
-                for (target in publications) {
-                    appendLine("${ext.artifactId}-${publicationNameToPlatformName(target.name)}")
-                }
-
-                appendLine()
-
-                appendLine(
-                    """
+            appendLine(
+                """
                         Gradle users can add multiplatform dependency in commonMain by `implementation("$groupId:$artifactId:$version")`.
                         Gradle users can also add $publishPlatformArtifactsInRootModule dependency by `implementation("$groupId:$artifactId:$version")`.
                     """.trimIndent()
-                )
+            )
+            appendLine()
+
+            val jvmTargets =
+                kotlin.targets.filter { it.platformType == KotlinPlatformType.jvm || it.platformType == KotlinPlatformType.androidJvm }
+
+            if (jvmTargets.isNotEmpty()) {
+                appendLine("Maven users can only add JVM dependencies, including: " + jvmTargets.joinToString { it.targetName })
                 appendLine()
 
-                val jvmTargets =
-                    kotlin.targets.filter { it.platformType == KotlinPlatformType.jvm || it.platformType == KotlinPlatformType.androidJvm }
-
-                if (jvmTargets.isNotEmpty()) {
-                    appendLine("Maven users can only add JVM dependencies, including: " + jvmTargets.joinToString { it.targetName })
-                    appendLine()
-
-                    for (target in jvmTargets) {
-                        appendLine(
-                            """
+                for (target in jvmTargets) {
+                    appendLine(
+                        """
                                     Maven users can add ${target.name} dependency as follows:
                                     <dependency>
                                         <groupId>${ext.groupId}</groupId>
@@ -116,16 +150,16 @@ open class PreviewPublication : DefaultTask() {
                                         <version>${ext.version}</version>
                                     </dependency>
                                 """.trimIndent()
-                        )
-                        appendLine()
-                    }
+                    )
+                    appendLine()
                 }
+            }
 
-                val publishPlatformArtifactsInRootModule = publishPlatformArtifactsInRootModule
-                if (publishPlatformArtifactsInRootModule != null) {
-                    appendLine("You have configured to publish $publishPlatformArtifactsInRootModule into root module.")
-                    appendLine(
-                        """
+            val publishPlatformArtifactsInRootModule = publishPlatformArtifactsInRootModule
+            if (publishPlatformArtifactsInRootModule != null) {
+                appendLine("You have configured to publish $publishPlatformArtifactsInRootModule into root module.")
+                appendLine(
+                    """
                         ${if (jvmTargets.isNotEmpty()) "So, Maven users can also" else "So, Maven users can"} add $publishPlatformArtifactsInRootModule dependency as follows:
                         <dependency>
                             <groupId>${ext.groupId}</groupId>
@@ -133,33 +167,16 @@ open class PreviewPublication : DefaultTask() {
                             <version>${ext.version}</version>
                         </dependency>
                     """.trimIndent()
-                    )
-                    appendLine()
-                }
-            }
-
-            val unknownArtifacts = getUnknownArtifacts()
-            if (!unknownArtifacts.all { it.second.isEmpty() }) {
+                )
                 appendLine()
-                appendLine("There are some extra files that are going to be published:")
-                appendLine()
-                for ((publication, files) in unknownArtifacts) {
-                    appendLine("[${publicationNameToPlatformName(publication.name)}]")
-                    for (artifact in files) {
-                        appendLine(artifact.render())
-                    }
-                    appendLine()
-                }
             }
-
-            appendLine("Publication Preview End")
         }
 
     }
 
     private fun MavenArtifact.render(): String = "${file.name}  (extension=$extension, classifier=$classifier)"
 
-    private fun getUnknownArtifacts(): List<Pair<MavenPublication, List<MavenArtifact>>> {
+    private fun getUnknownArtifacts(knownExtensionAndClassifiers: List<Pair<String, String?>>): List<Pair<MavenPublication, List<MavenArtifact>>> {
         val extension = project.extensions.findByType(PublishingExtension::class.java) ?: return listOf()
         return extension.publications
             .filterIsInstance<MavenPublication>()
