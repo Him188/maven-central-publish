@@ -9,6 +9,7 @@ import me.him188.maven.central.publish.gradle.testFramework.MavenRunner
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenFileLocations
 import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenSettingsProvider
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DynamicTest
 import java.io.File
 import kotlin.test.assertEquals
@@ -114,6 +115,11 @@ fun mavenLocal(groupId: String) = mavenLocalDir.resolve(groupId).apply { registe
 
 abstract class AbstractPublishingTest : AbstractPluginTest() {
     val publisherDir: File by lazy { createTempDirSmart() }
+
+    @AfterEach
+    fun cleanupPublisherDir() {
+        publisherDir.deleteRecursively()
+    }
 
     fun runPublishToMavenLocal() = assertGradleTaskSuccess(publisherDir, "publishToMavenLocal")
 
