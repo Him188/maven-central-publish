@@ -182,7 +182,7 @@ open class MavenCentralPublishExtension(
      *
      * ```
      * tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
-     * this.archiveFileName.set("${mavenCentralPublish.artifactId}-${mavenCentralPublish.version}-all")
+     *     archiveFileName.set("${mavenCentralPublish.artifactId}-${mavenCentralPublish.version}-all.jar")
      * }
      * ```
 

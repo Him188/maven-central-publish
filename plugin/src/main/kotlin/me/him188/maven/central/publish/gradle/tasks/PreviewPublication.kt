@@ -3,6 +3,8 @@ package me.him188.maven.central.publish.gradle.tasks
 import me.him188.maven.central.publish.gradle.mcExt
 import org.gradle.api.DefaultTask
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenArtifact
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -12,6 +14,14 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 open class PreviewPublication : DefaultTask() {
     companion object {
         const val TASK_NAME = "previewPublication"
+
+        val knownExtensionAndClassifiers = listOf(
+            "jar" to "javadoc",
+            "jar" to "samplessources",
+            "jar" to "sources",
+            "jar" to null,
+            "klib" to null,
+        )
     }
 
     private val ext get() = project.mcExt
@@ -62,6 +72,7 @@ open class PreviewPublication : DefaultTask() {
             fun publicationNameToPlatformName(name: String) = when (name) {
                 "kotlinMultiplatform" -> "common"
                 "metadata" -> "common"
+                "mavenCentral" -> "jvm"
                 else -> name
             }
 
@@ -127,8 +138,34 @@ open class PreviewPublication : DefaultTask() {
                 }
             }
 
+            val unknownArtifacts = getUnknownArtifacts()
+            if (!unknownArtifacts.all { it.second.isEmpty() }) {
+                appendLine()
+                appendLine("There are some extra files that are going to be published:")
+                appendLine()
+                for ((publication, files) in unknownArtifacts) {
+                    appendLine("[${publicationNameToPlatformName(publication.name)}]")
+                    for (artifact in files) {
+                        appendLine(artifact.render())
+                    }
+                    appendLine()
+                }
+            }
+
             appendLine("Publication Preview End")
         }
 
+    }
+
+    private fun MavenArtifact.render(): String = "${file.name}  (extension=$extension, classifier=$classifier)"
+
+    private fun getUnknownArtifacts(): List<Pair<MavenPublication, List<MavenArtifact>>> {
+        val extension = project.extensions.findByType(PublishingExtension::class.java) ?: return listOf()
+        return extension.publications
+            .filterIsInstance<MavenPublication>()
+            .map { publication ->
+                publication to publication.artifacts
+                    .filter { it.extension to it.classifier !in knownExtensionAndClassifiers }
+            }
     }
 }

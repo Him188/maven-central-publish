@@ -100,7 +100,7 @@ class JvmPublishingWithShadowTest : AbstractPublishingTest() {
                 licenseFromGitHubProject("Apache-2.0", "master")
             }
             tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
-                this.archiveFileName.set("$customArtifactId-$customVersion-all")
+                archiveFileName.set("$customArtifactId-$customVersion-all.jar")
             }
         """.trimIndent()
         )
