@@ -46,8 +46,8 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     // ok
                 } else {
                     when (workingDir.listFiles()?.isEmpty()) {
-                        null -> error("Working dir '${workingDir}' is not a directory. Please change in `mavenCentralPublish.workingDir`")
-                        false -> error("Working dir '${workingDir}' is not empty. Please change in `mavenCentralPublish.workingDir`")
+                        null -> error("Working dir '${workingDir}' is not a directory. Please change `mavenCentralPublish.workingDir`")
+                        false -> error("Working dir '${workingDir}' is not empty. Please change `mavenCentralPublish.workingDir`")
                         true -> {}
                     }
                 }
@@ -55,6 +55,9 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 // ok
             }
             workingDir.mkdirs()
+            if (!workingDir.isDirectory) {
+                error("Failed to create directory '${workingDir.absolutePath}'. Please change `mavenCentralPublish.workingDir`")
+            }
             securityFile.writeText(
                 """
                         This file is created by the Gradle plugin '$PLUGIN_ID', and this directory is reserved for publication. 
