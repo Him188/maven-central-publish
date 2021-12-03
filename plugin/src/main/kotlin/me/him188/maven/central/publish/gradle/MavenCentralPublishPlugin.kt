@@ -263,7 +263,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                         artifact(getJarTask("javadoc"))
                         this.groupId = ext.groupId
                         this.artifactId = ext.artifactId
-                        this.version = project.version.toString()
+                        this.version = ext.version
                         setupPom(publication, ext)
                         ext.publicationConfigurators.forEach {
                             it.execute(this)
