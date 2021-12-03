@@ -252,7 +252,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                 logger.warn("[MavenCentralPublish] `deploymentServerUrl` was set to `null`, so no server is being automatically set. ")
             }
 
-            if (project.isMpp) {
+            if (!project.isMpp) {
                 publications.register(name, MavenPublication::class.java) { publication ->
                     publication.run {
                         if (ext.addProjectComponents) {
@@ -348,7 +348,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     }
 }
 
-internal val Project.isMpp get() = project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") == null
+internal val Project.isMpp get() = project.plugins.findPlugin("org.jetbrains.kotlin.multiplatform") != null
 
 private fun <T : Task> TaskContainer.getOrRegister(name: String, type: Class<T>, configurationAction: T.() -> Unit): T {
     return findByName(name)?.let { type.cast(it) } ?: register(name, type, configurationAction).get()
