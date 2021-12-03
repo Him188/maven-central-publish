@@ -21,7 +21,7 @@ class VerifierScope(
     val dir: File,
     val expected: Boolean,
 ) {
-    fun verify(file: String, andSignature: Boolean = true) {
+    fun verify(file: String, andSignature: Boolean = true, expected: Boolean = this.expected) {
         assertEquals(expected, dir.resolve(file).exists(), message = dir.resolve(file).absolutePath)
         if (andSignature && !file.endsWith(".asc")) {
             assertEquals(

@@ -125,13 +125,13 @@ open class MavenCentralPublishExtension(
      * [MavenPom] (`pom.xml`) configurators.
      *
      * Maven Central will validate this pom, and requires the following information:
-     * - project id and group ---- auto-get from [artifactId] and [groupId]
-     * - project name ---- auto-get from [Project.getName]
-     * - project description ---- auto-get from [Project.getDescription]
-     * - project url ---- use [projectUrl]
-     * - project SCM ---- use [connection]
-     * - project licenses ---- use [license]
-     * - project developers ---- use [developer]
+     * - project id and group ---- [artifactId] and [groupId]
+     * - project name ---- [projectName]
+     * - project description ---- [projectDescription]
+     * - project url ---- [projectUrl]
+     * - project SCM ---- [connection]
+     * - project licenses ---- [license]
+     * - project developers ---- [developer]
      *
      * Therefore, please ensure that you set
      */

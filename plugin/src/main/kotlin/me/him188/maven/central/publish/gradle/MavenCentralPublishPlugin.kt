@@ -291,7 +291,10 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                                 publication.artifact(getJarTask("samplessources"))
                             }
                         }
-                        // mingwx64 and others
+                        else -> {
+                            publication.artifactId =
+                                "${ext.artifactId}${publication.artifactId.substringAfter(project.name)}"
+                        }
                     }
                     ext.publicationConfigurators.forEach {
                         it.execute(publication)

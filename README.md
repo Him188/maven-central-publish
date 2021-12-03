@@ -69,18 +69,22 @@ for full details for each property.
 
 As required by Maven Central, you would need
 
-- project id and group ---- auto-get from `[Project.getName]` and `[Project.getGroup]`
-- project name ---- auto-get from `[Project.getName]`
-- project description ---- auto-get from `[Project.getDescription]`
-- project url ---- use `[projectUrl]`
-- project SCM ---- use `[connection]`
-- project licenses ---- use `[license]`
-- project developers ---- use `[developer]`
+- project id and group ---- `[Project.getName]` and `[Project.getGroup]`
+- project name ---- `[Project.getName]`
+- project description ---- `[Project.getDescription]`
+- project url ---- `[projectUrl]`
+- project SCM ---- `[connection]`
+- project licenses ---- `[license]`
+- project developers ---- `[developer]`
 
-A recommended, minimal, manual configuration can be:
+It would be easier to keep your `project.name`, `project.group`, `project.version` same as which you want to use for
+your published artifacts.
+
+A recommended, minimal, manual configuration is:
 
 ```kotlin
 mavenCentralPublish {
+    // If different from that from project, specify manually:
     artifactId = "kotlin-jvm-blocking-bridge-runtime"
     groupId = "me.him188"
     projectName = "Kotlin JVM Blocking Bridge Runtime"
@@ -98,6 +102,7 @@ However, configuration for GitHub projects can be simplified:
 
 ```kotlin
 mavenCentralPublish {
+    // If different from that from project, specify manually:
     artifactId = "kotlin-jvm-blocking-bridge-runtime"
     groupId = "me.him188"
     projectName = "Kotlin JVM Blocking Bridge Runtime"
@@ -128,7 +133,7 @@ mavenCentralPublish {
         // Configures the publication.
         groupId = "me.him188" // This 'overrides' mavenCentralPublish.groupId
         from(components.getByName("java")) // Add custom component if needed. You may also set `mavenCentralPublish.addProjectComponents` to `false` to disable default components.
-        artifact(tasks.get("shadow")) // You can a custom artifact
+        artifact(tasks.get("myCustomJarTask")) // You can a custom artifact
     }
 }
 ```
@@ -143,12 +148,26 @@ mavenCentralPublish {
 }
 ```
 
+### Integration with shadow plugin
+
+As [described](https://imperceptiblethoughts.com/shadow/publishing/#publishing-shadow-jars), Shadow plugin automatically
+adds an artifact "$name-$version-all.jar" to all `MavenPublication`s. This file will be included in the publication.
+
+This would work normally if both `mavenCentralPublish.artifactId == project.name`
+and `mavenCentralPublish.version == project.version`. However, if not, you should rename the '-all' artifact as follows:
+
+```kotlin
+tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+    this.archiveFileName.set("${mavenCentralPublish.artifactId}-${mavenCentralPublish.version}-all")
+}
+```
+
 ### Adding custom artifacts
 
 ```kotlin
 mavenCentralPublish {
     publication {
-        artifacts.artifact(tasks.getByName("shadow"))
+        artifacts.artifact(tasks.getByName("myCustomJarTask"))
     }
 }
 ```
