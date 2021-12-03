@@ -12,7 +12,7 @@ class JvmPublishingTest : AbstractPublishingTest() {
     @TestFactory
     fun `can publish Kotlin JVM`() = createTestsForKotlinVersions {
         val rand = Random.nextInt().absoluteValue
-        val group = "group-id"
+        val group = "group-id-$rand"
         val name = "project-name"
         val version = "1.0.0"
         val packageName = "test${rand}"

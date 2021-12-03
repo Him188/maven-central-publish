@@ -115,10 +115,17 @@ fun mavenLocal(groupId: String) = mavenLocalDir.resolve(groupId).apply { registe
 
 abstract class AbstractPublishingTest : AbstractPluginTest() {
     val publisherDir: File by lazy { createTempDirSmart() }
+    private val groupIdsToDelete = mutableListOf<String>()
+
+    fun deletePublishedFilesOnFinish(groupId: String) {
+        if (groupId.isBlank()) error("groupId cannot be blank")
+        groupIdsToDelete.add(groupId)
+    }
 
     @AfterEach
     fun cleanupPublisherDir() {
         publisherDir.deleteRecursively()
+        groupIdsToDelete.forEach { mavenLocal(it).deleteRecursively() }
     }
 
     fun runPublishToMavenLocal() = assertGradleTaskSuccess(publisherDir, "publishToMavenLocal")
@@ -133,6 +140,8 @@ abstract class AbstractPublishingTest : AbstractPluginTest() {
         expected: Boolean,
         verifier: Verifier = {}
     ) {
+        deletePublishedFilesOnFinish(groupId)
+
         val dir = mavenLocal(groupId).resolve(moduleId.toLowerCase()).resolve(version)
         println("Verifying: " + dir.absolutePath)
         assertEquals(expected, dir.exists(), dir.absolutePath)
