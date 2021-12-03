@@ -264,7 +264,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                         this.groupId = ext.groupId
                         this.artifactId = ext.artifactId
                         this.version = project.version.toString()
-                        setupPom(publication, project, ext)
+                        setupPom(publication, ext)
                         ext.publicationConfigurators.forEach {
                             it.execute(this)
                         }
@@ -279,7 +279,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                     publication.groupId = ext.groupId
                     publication.version = ext.version
 
-                    setupPom(publication, project, ext)
+                    setupPom(publication, ext)
 
                     when (val type = publication.name) {
                         "kotlinMultiplatform" -> {
@@ -308,7 +308,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
                                 )
                             } // Kotlin enforce targets to be lowercase
                             ?: error(
-                                "Could not find publication with artifactId '${project.name}-$targetName' for root module. " +
+                                "Could not find publication with artifactId '${ext.artifactId}-$targetName' for root module. " +
                                         "This means the target name '$targetName' you specified to `publishPlatformArtifactsInRootModule` is invalid." +
                                         "Your publishable targets: ${
                                             publications.filterIsInstance<MavenPublication>()
@@ -325,18 +325,14 @@ class MavenCentralPublishPlugin : Plugin<Project> {
 
     private fun setupPom(
         mavenPublication: MavenPublication,
-        project: Project,
         ext: MavenCentralPublishExtension
     ) {
         mavenPublication.pom { pom ->
             pom.withXml {
                 it.asNode()
             }
-            pom.name.set(project.project.name)
-            pom.description.set(project.project.description ?: project.rootProject.description ?: kotlin.run {
-                project.logger.warn("[MavenCentralPublish] Project description not found for project '${project.path}'. Please set by `project.description`.")
-                "No description provided."
-            })
+            pom.name.set(ext.projectName)
+            pom.description.set(ext.projectDescription)
             pom.url.set(ext.projectUrl)
             pom.scm { scm ->
                 scm.url.set(ext.projectUrl)

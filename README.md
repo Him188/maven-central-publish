@@ -2,9 +2,6 @@
 
 Configure publication to Maven Central repository for Gradle projects with minimal effort.
 
-- [How to use this plugin in a local project](UseInLocalProject.md)
-- [How to use this plugin in CI environment](UseInCI.md)
-
 ## Why this plugin?
 
 ### Pack credentials once, use anywhere
@@ -53,29 +50,124 @@ plugins {
 }
 ```
 
+## Step-by-step tutorials
+
+You can read these tutorials if you are new to publishing. Also, you can continue reading this article for quick
+reference.
+
+- [How to use this plugin in a local project](UseInLocalProject.md)
+- [How to use this plugin in CI environment](UseInCI.md)
+
 ## Configuring the plugin
 
-The plugin adds a `mavenCentralPublish` configuration.
+The plugin adds a `mavenCentralPublish` configuration. This chapter shows some handy examples.
+
+See [MavenCentralPublishExtension](plugin/src/main/kotlin/me/him188/maven/central/publish/gradle/MavenCentralPublishExtension.kt)
+for full details for each property.
+
+### Basic configuration
+
+As required by Maven Central, you would need
+
+- project id and group ---- auto-get from `[Project.getName]` and `[Project.getGroup]`
+- project name ---- auto-get from `[Project.getName]`
+- project description ---- auto-get from `[Project.getDescription]`
+- project url ---- use `[projectUrl]`
+- project SCM ---- use `[connection]`
+- project licenses ---- use `[license]`
+- project developers ---- use `[developer]`
+
+A recommended, minimal, manual configuration can be:
 
 ```kotlin
 mavenCentralPublish {
-    // TODO
+    artifactId = "kotlin-jvm-blocking-bridge-runtime"
+    groupId = "me.him188"
+    projectName = "Kotlin JVM Blocking Bridge Runtime"
+    // description from project.description by default
+
+    url = "https://github.com/him188/kotlin-jvm-blocking-bridge"
+    connection = "scm:git:git://github.com/him188/kotlin-jvm-blocking-bridge.git"
+    license("Apache-2.0", "https://www.apache.org/licenses/LICENSE-2.0")
+
+    developer("Him188")
 }
 ```
 
-## Plugin Tasks
+However, configuration for GitHub projects can be simplified:
 
-### `checkPublicationCredentials`
+```kotlin
+mavenCentralPublish {
+    artifactId = "kotlin-jvm-blocking-bridge-runtime"
+    groupId = "me.him188"
+    projectName = "Kotlin JVM Blocking Bridge Runtime"
+
+    githubProject("him188", "kotlin-jvm-blocking-bridge")
+    developer("him188")
+    licenseApacheV2()
+
+    // and can be more simplified as 
+    singleDevGithubProject("him188", "kotlin-jvm-blocking-bridge")
+    licenseApacheV2()
+}
+```
+
+### Configuring other details
+
+The `mavenCentralPublish { }` contain only the required information. You can add further configurators as follows. Note
+that all these configurators override the properties in `mavenCentralPublish { }`.
+
+```kotlin
+mavenCentralPublish {
+    pom { // this: MavenPom
+        // Configures the pom. Example:
+        name.set("Project Name Here") // This 'overrides' mavenCentralPublish.projectName
+        inceptionYear.set("2021") // Set more optional details
+    }
+    publication { // this: MavenPublication
+        // Configures the publication.
+        groupId = "me.him188" // This 'overrides' mavenCentralPublish.groupId
+        from(components.getByName("java")) // Add custom component if needed. You may also set `mavenCentralPublish.addProjectComponents` to `false` to disable default components.
+        artifact(tasks.get("shadow")) // You can a custom artifact
+    }
+}
+```
+
+### Supporting consumers who cannot access Gradle Metadata
+
+This is only for Kotlin MPP with JVM targets. This enables Maven to access your project without the '-jvm' suffix.
+
+```kotlin
+mavenCentralPublish {
+    publishPlatformArtifactsInRootModule = "jvm" // name of your JVM target ---- it is "jvm" by default.
+}
+```
+
+### Adding custom artifacts
+
+```kotlin
+mavenCentralPublish {
+    publication {
+        artifacts.artifact(tasks.getByName("shadow"))
+    }
+}
+```
+
+## Checking your configuration
+
+All tasks are in the group 'publishing' like the task 'publish'.
+
+### Task `checkPublicationCredentials`
 
 Ensures publication credentials is set.
 
-### `checkMavenCentralPublication`
+### Task `checkMavenCentralPublication`
 
 Ensures project is ready to publish with all required information configured.
 
-### `previewPublication`
+### Task `previewPublication`
 
-Have a preview at the project structure to be published. Example:
+Have a preview at the project structure to be published to eliminate your concerns and saves time. Example:
 
 ```text
 Publication Preview
@@ -116,3 +208,12 @@ So, Maven users can also add jvm dependency as follows:
 
 Publication Preview End
 ```
+
+## Troubleshooting
+
+See [Troubleshooting.md](Troubleshooting.md).
+
+## Supporting this plugin
+
+I personally develop various libraries and publish them to Maven Central. So even without anyone's help, I will continue
+to maintain this plugin. However, it would be really lovely if you could give me a star!

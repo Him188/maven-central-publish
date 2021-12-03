@@ -77,7 +77,7 @@ open class MavenCentralPublishExtension(
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Project Coordinates
+    // Mandatory Project Coordinates
     ///////////////////////////////////////////////////////////////////////////
 
     /**
@@ -91,12 +91,24 @@ open class MavenCentralPublishExtension(
     var connection: String = ""
 
     /**
+     * Name of this project for the publication.
+     */
+    var projectName: String by lazyDefault { project.name }
+
+    /**
+     * Description of this project for the publication.
+     */
+    var projectDescription: String by lazyDefault {
+        project.description ?: project.rootProject.description ?: projectName
+    }
+
+    /**
      * Group ID for the publication.
      */
     var groupId: String by lazyDefault { project.group.toString() }
 
     /**
-     * Group ID for the publication.
+     * Artifact ID for the publication.
      */
     var artifactId: String by lazyDefault { project.name }
 
@@ -105,17 +117,21 @@ open class MavenCentralPublishExtension(
      */
     var version: String by lazyDefault { project.version.toString() }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // Optional configurators
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
      * [MavenPom] (`pom.xml`) configurators.
      *
      * Maven Central will validate this pom, and requires the following information:
-     * - project id and group ---- auto-get from [Project.getName] and [Project.getGroup]
+     * - project id and group ---- auto-get from [artifactId] and [groupId]
      * - project name ---- auto-get from [Project.getName]
      * - project description ---- auto-get from [Project.getDescription]
      * - project url ---- use [projectUrl]
+     * - project SCM ---- use [connection]
      * - project licenses ---- use [license]
      * - project developers ---- use [developer]
-     * - project SCM ---- use [connection]
      *
      * Therefore, please ensure that you set
      */
@@ -187,7 +203,7 @@ open class MavenCentralPublishExtension(
     var publishPlatformArtifactsInRootModule: String? = null
 
     ///////////////////////////////////////////////////////////////////////////
-    // Quick configurator
+    // Quick configurators
     ///////////////////////////////////////////////////////////////////////////
 
     /**

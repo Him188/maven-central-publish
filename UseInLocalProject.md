@@ -9,7 +9,7 @@
 1. Apply Gradle plugin
    ```kotlin
    plugins {
-      id("me.him188.maven-central-publish") version "0.4.5"
+      id("me.him188.maven-central-publish") version "1.0.0-dev-1"
    }
    ```
 2. Configure `mavenCentralPublish`  
@@ -23,7 +23,7 @@
    ```
 3. Set ***credentials:*** set any of Gradle property, JVM property, JVM or system environment variable
    named `publication.credentials` or `PUBLICATION_CREDENTIALS`
-4. Finish
+4. Finish. Run task `publish`.
 
 ----
 
@@ -114,7 +114,7 @@ not affect subprojects.
 
 ```kotlin
 plugins {
-    id("me.him188.maven-central-publish") version "0.4.5"
+    id("me.him188.maven-central-publish") version "1.0.0-dev-1"
     // then apply other plugins if needed
 }
 ```
@@ -123,7 +123,7 @@ plugins {
 
 ```
 plugins {
-    id 'net.mamoe.maven-central-publish' version '0.4.5' 
+    id 'net.mamoe.maven-central-publish' version '1.0.0-dev-1 
     // then apply other plugins if needed
 }
 ```
@@ -218,7 +218,7 @@ Add argument `-Ppublication.credentials=CONTENT OF credentials.txt`.
 
 ```groovy
 mavenCentralPublish {
-    credentials = TODO()
+    credentials = TODO() // provide a PublicationCredentials instance.
 }
 ```
 
