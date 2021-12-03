@@ -91,18 +91,6 @@ open class MavenCentralPublishExtension(
     var connection: String = ""
 
     /**
-     * Package group when closing repository on [Sonatype OSS](https://oss.sonatype.org/#stagingRepositories).
-     *
-     * Retries from [PublicationCredentials.packageGroup] if you have set it when generating the credentials,
-     * otherwise, get from [Project.getGroup] from current project or root project.
-     *
-     * Task `closeAndReleaseRepository` depends on this value.
-     */
-    var packageGroup: String by lazyDefault {
-        credentials?.packageGroup ?: (project.group ?: project.rootProject.group).toString()
-    }
-
-    /**
      * Group ID for the publication.
      */
     var groupId: String by lazyDefault { project.group.toString() }

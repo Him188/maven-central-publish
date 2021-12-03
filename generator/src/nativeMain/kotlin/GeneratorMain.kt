@@ -53,7 +53,6 @@ fun main() = runPrintErrorMessage {
         pgpPrivateKey = gpgPrivate,
         sonatypeUsername = sonatypeUsername,
         sonatypePassword = sonatypePassword,
-        packageGroup = packageGroup,
     )
 
     val format = ProtoBuf
