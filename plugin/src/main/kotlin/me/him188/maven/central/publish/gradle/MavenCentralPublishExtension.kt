@@ -174,7 +174,7 @@ open class MavenCentralPublishExtension(
      *
      * If you applied shadow-plugin (`com.github.johnrengelman.shadow`), there will be another artifact named `project-name-all.jar`.
      *
-     * Additionally, each file is signed with your [PublicationCredentials.pgpPrivateKey] in [credentials].
+     * Additionally, each file is signed with your [PublicationCredentials.gpgPrivateKey] in [credentials].
      */
     val publicationConfigurators: MutableList<Action<MavenPublication>> = mutableListOf()
 

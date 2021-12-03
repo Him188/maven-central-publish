@@ -23,18 +23,18 @@ internal object Credentials {
     }
 
     fun check(credentials: PublicationCredentials) {
-        check(credentials.pgpPublicKey.trimStart().startsWith(PGP_PUBLIC_KEY_BEGIN)) { "Invalid PGP public key" }
-        check(credentials.pgpPublicKey.trimEnd().endsWith(PGP_PUBLIC_KEY_END)) { "Invalid PGP public key" }
+        check(credentials.gpgPublicKey.trimStart().startsWith(GPG_PUBLIC_KEY_BEGIN)) { "Invalid GPG public key" }
+        check(credentials.gpgPublicKey.trimEnd().endsWith(GPG_PUBLIC_KEY_END)) { "Invalid GPG public key" }
 
-        check(credentials.pgpPrivateKey.trimStart().startsWith(PGP_PRIVATE_KEY_BEGIN)) { "Invalid PGP private key" }
-        check(credentials.pgpPrivateKey.trimEnd().endsWith(PGP_PRIVATE_KEY_END)) { "Invalid PGP private key" }
+        check(credentials.gpgPrivateKey.trimStart().startsWith(GPG_PRIVATE_KEY_BEGIN)) { "Invalid GPG private key" }
+        check(credentials.gpgPrivateKey.trimEnd().endsWith(GPG_PRIVATE_KEY_END)) { "Invalid GPG private key" }
 
         check(credentials.sonatypePassword.isNotBlank()) { "Sonatype password must not be empty." }
         check(credentials.sonatypeUsername.isNotBlank()) { "Sonatype username must not be empty." }
     }
 
-    const val PGP_PUBLIC_KEY_BEGIN = "-----BEGIN PGP PUBLIC KEY BLOCK-----"
-    const val PGP_PUBLIC_KEY_END = "-----END PGP PUBLIC KEY BLOCK-----"
-    const val PGP_PRIVATE_KEY_BEGIN = "-----BEGIN PGP PRIVATE KEY BLOCK-----"
-    const val PGP_PRIVATE_KEY_END = "-----END PGP PRIVATE KEY BLOCK-----"
+    const val GPG_PUBLIC_KEY_BEGIN = "-----BEGIN GPG PUBLIC KEY BLOCK-----"
+    const val GPG_PUBLIC_KEY_END = "-----END GPG PUBLIC KEY BLOCK-----"
+    const val GPG_PRIVATE_KEY_BEGIN = "-----BEGIN GPG PRIVATE KEY BLOCK-----"
+    const val GPG_PRIVATE_KEY_END = "-----END GPG PRIVATE KEY BLOCK-----"
 }

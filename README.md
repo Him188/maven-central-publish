@@ -6,7 +6,7 @@ Configure publication to Maven Central repository for Gradle projects with minim
 
 ### Pack credentials once, use anywhere
 
-You can pack your Sonatype and PGP keys once, then use it around any projects directly. You can add it into your global
+You can pack your Sonatype and GPG keys once, then use it around any projects directly. You can add it into your global
 gradle.properties or store in GitHub secretes for Actions.
 
 ### Automatic configuration for usual Java and Kotlin projects

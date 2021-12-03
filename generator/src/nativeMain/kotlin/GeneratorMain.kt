@@ -49,8 +49,8 @@ fun main() = runPrintErrorMessage {
     println("GPG private key length is ${gpgPrivate.length}")
 
     val data = PublicationCredentials(
-        pgpPublicKey = gpgPublic,
-        pgpPrivateKey = gpgPrivate,
+        gpgPublicKey = gpgPublic,
+        gpgPrivateKey = gpgPrivate,
         sonatypeUsername = sonatypeUsername,
         sonatypePassword = sonatypePassword,
     )
