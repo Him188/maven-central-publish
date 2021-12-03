@@ -33,8 +33,8 @@ internal object Credentials {
         check(credentials.sonatypeUsername.isNotBlank()) { "Sonatype username must not be empty." }
     }
 
-    const val GPG_PUBLIC_KEY_BEGIN = "-----BEGIN GPG PUBLIC KEY BLOCK-----"
-    const val GPG_PUBLIC_KEY_END = "-----END GPG PUBLIC KEY BLOCK-----"
-    const val GPG_PRIVATE_KEY_BEGIN = "-----BEGIN GPG PRIVATE KEY BLOCK-----"
-    const val GPG_PRIVATE_KEY_END = "-----END GPG PRIVATE KEY BLOCK-----"
+    const val GPG_PUBLIC_KEY_BEGIN = "-----BEGIN PGP PUBLIC KEY BLOCK-----"
+    const val GPG_PUBLIC_KEY_END = "-----END PGP PUBLIC KEY BLOCK-----"
+    const val GPG_PRIVATE_KEY_BEGIN = "-----BEGIN PGP PRIVATE KEY BLOCK-----"
+    const val GPG_PRIVATE_KEY_END = "-----END PGP PRIVATE KEY BLOCK-----"
 }
