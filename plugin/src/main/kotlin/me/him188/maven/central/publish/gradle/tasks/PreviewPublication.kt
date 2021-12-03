@@ -43,7 +43,7 @@ open class PreviewPublication : DefaultTask() {
 
                 appendLine(
                     """
-                        Gradle users can add dependency by `implementation("$groupId:$artifactId:$version")`repository declared.
+                        Gradle users can add dependency by `implementation("$groupId:$artifactId:$version")`.
                     """.trimIndent()
                 )
 

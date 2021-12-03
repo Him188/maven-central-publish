@@ -42,7 +42,7 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
                   Version: 1.0.0
 
                 Your project targets JVM platform only.
-                Gradle users can add dependency by `implementation("group-id:project-name:1.0.0")`repository declared.
+                Gradle users can add dependency by `implementation("group-id:project-name:1.0.0")`.
                 Maven users can add dependency as follows:
                 <dependency>
                     <groupId>group-id</groupId>
@@ -94,7 +94,7 @@ class JvmPreviewPublicationTest : AbstractPreviewPublicationTest() {
                   Version: 9.9.9
 
                 Your project targets JVM platform only.
-                Gradle users can add dependency by `implementation("custom-group-id:custom-artifact-id:9.9.9")`repository declared.
+                Gradle users can add dependency by `implementation("custom-group-id:custom-artifact-id:9.9.9")`.
                 Maven users can add dependency as follows:
                 <dependency>
                     <groupId>custom-group-id</groupId>
