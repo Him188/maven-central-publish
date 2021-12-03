@@ -172,8 +172,20 @@ open class MavenCentralPublishExtension(
      *
      * ### Using shadow plugin
      *
-     * If you applied shadow-plugin (`com.github.johnrengelman.shadow`), there will be another artifact named `project-name-all.jar`.
+     * The plugin can integrate with Shadow plugin (`com.github.johnrengelman.shadow`), but with care.
      *
+     * As [described](https://imperceptiblethoughts.com/shadow/publishing/#publishing-shadow-jars), Shadow plugin automatically
+     * adds an artifact "$name-$version-all.jar" to all `MavenPublication`s. This file will be included in the publication.
+     *
+     * This would work normally if both `mavenCentralPublish.artifactId == project.name`
+     * and `mavenCentralPublish.version == project.version`. However, if not, you should rename the '-all' artifact as follows:
+     *
+     * ```
+     * tasks.withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class) {
+     * this.archiveFileName.set("${mavenCentralPublish.artifactId}-${mavenCentralPublish.version}-all")
+     * }
+     * ```
+
      * Additionally, each file is signed with your [PublicationCredentials.gpgPrivateKey] in [credentials].
      */
     val publicationConfigurators: MutableList<Action<MavenPublication>> = mutableListOf()
