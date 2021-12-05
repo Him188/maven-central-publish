@@ -9,6 +9,11 @@ Configure publication to Maven Central repository for Gradle projects with minim
 You can pack your Sonatype and GPG keys once, then use it around any projects directly. You can add it into your global
 gradle.properties or store in GitHub secretes for Actions.
 
+### Automatic signing
+
+The plugin automatically signs all the artifacts using your GPG keys from the pre-set credentials. So you don't need any
+other steps for it. Also, no concerns on the singing and publishing integration!
+
 ### Automatic configuration for usual Java and Kotlin projects
 
 This simplest configuration applies to most projects:
