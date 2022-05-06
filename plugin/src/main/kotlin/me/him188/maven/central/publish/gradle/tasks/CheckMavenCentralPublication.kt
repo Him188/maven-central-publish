@@ -17,5 +17,6 @@ open class CheckMavenCentralPublication : DefaultTask() {
         Credentials.check(credentials)
         check(ext.projectUrl.isNotBlank()) { "'projectUrl' is not set. This means `mavenCentralPublish` is not configured." }
         check(ext.connection.isNotBlank()) { "'connection' is not set. This means `mavenCentralPublish` is not configured." }
+        check(ext.costomPomConfiguratorsCount != 0 || ext.developersCount > 0) { "'developer' is not set. You can call `developer()` inside `mavenCentralPublish { }`." }
     }
 }

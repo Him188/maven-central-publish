@@ -38,6 +38,22 @@ class ConfigurationTest : AbstractPluginConfigurationTest() {
     }
 
     @Test
+    fun `should fail if developer not set`() {
+        buildFile.appendText(
+            """
+            mavenCentralPublish {
+                githubProject("Him188", "yamlkt")
+                licenseFromGitHubProject("Apache-2.0", "master")
+            }
+        """.trimIndent()
+        )
+
+        assertGradleTaskOutcome(tempDir, CheckMavenCentralPublication.TASK_NAME, TaskOutcome.FAILED) {
+            assertTrue { output.contains("'developer' is not set") }
+        }
+    }
+
+    @Test
     fun `should pass if correctly configured`() {
         buildFile.appendText(
             """

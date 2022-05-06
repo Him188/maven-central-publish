@@ -136,12 +136,14 @@ open class MavenCentralPublishExtension(
      * Therefore, please ensure that you set
      */
     val pomConfigurators: MutableList<Action<MavenPom>> = mutableListOf()
+    internal var costomPomConfiguratorsCount = 0;
 
     /**
      * Adds a configurator to [pomConfigurators]
      */
     fun pom(action: Action<MavenPom>) {
         pomConfigurators.add(action)
+        costomPomConfiguratorsCount++
     }
 
     /**
@@ -301,6 +303,8 @@ open class MavenCentralPublishExtension(
     // Developers
     ///////////////////////////////////////////////////////////////////////////
 
+    internal var developersCount = 0;
+
     /**
      * Add a developer. [id] is required and must be unique.
      *
@@ -332,6 +336,8 @@ open class MavenCentralPublishExtension(
      * @see developer
      */
     fun developer(action: Action<MavenPomDeveloper>) {
+        developersCount++
+
         pomConfigurators.add {
             it.developers { spec ->
                 spec.developer { dev ->
