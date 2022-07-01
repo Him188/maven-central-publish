@@ -50,7 +50,8 @@ by [How to Publish Your Artifacts to Maven Central](https://dzone.com/articles/p
 
 ### Get Sonatype User Token
 
-<https://oss.sonatype.org/>
+<https://oss.sonatype.org/> or new server <https://s01.oss.sonatype.org>
+> As of February 2021, all new projects began being provisioned on https://s01.oss.sonatype.org/
 
 1. Login with your Sonatype account
 2. On the upper right corner, click your username
@@ -76,7 +77,7 @@ your Sonatype account, but you can reset the User Token so it is more safe.
 
 2. Upload the key pair to a public keyserver
 
-   <http://pool.sks-keyservers.net:11371/>
+   <https://keys.openpgp.org/>
 
    Open `keys.gpg.pub` as a text file, upload its content to the website.
 
