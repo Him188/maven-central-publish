@@ -75,6 +75,8 @@ your Sonatype account, but you can reset the User Token so it is more safe.
         - `keys.gpg.pub`: the ***public key***
         - `keys.gpg`: the ***private key***
 
+> Make sure that your GPG Key *has no password* otherwise you cannot sign your artifacts successfully.
+
 2. Upload the key pair to a public keyserver
 
    <https://keys.openpgp.org/>
