@@ -37,7 +37,7 @@ dependencies {
     compileOnly(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
-    implementation("io.github.karlatemp:PublicationSign:1.3.12")
+    implementation("io.github.karlatemp:PublicationSign:1.3.40")
 
     testImplementation(gradleApi())
     testImplementation(localGroovy())
