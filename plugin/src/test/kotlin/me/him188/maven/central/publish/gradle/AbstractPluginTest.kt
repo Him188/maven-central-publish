@@ -19,6 +19,8 @@ abstract class AbstractPluginTest {
             "1.4.31",
             "1.5.31",
             "1.6.0",
+            "1.7.0",
+            "1.8.0"
         )
     }
 
