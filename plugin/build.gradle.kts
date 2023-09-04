@@ -85,6 +85,6 @@ kotlin.target.compilations.all {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
         freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
