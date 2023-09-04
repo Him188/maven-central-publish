@@ -117,6 +117,6 @@ private fun writeFile(path: String, text: String): Boolean {
 private fun getCurrentDir(): String? {
     memScoped {
         val byte = allocArray<ByteVar>(PATH_MAX)
-        return getcwd(byte, PATH_MAX)?.toKString()
+        return getcwd(byte, PATH_MAX.toULong())?.toKString()
     }
 }

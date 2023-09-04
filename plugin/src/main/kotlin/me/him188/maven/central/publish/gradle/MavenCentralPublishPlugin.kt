@@ -199,7 +199,7 @@ class MavenCentralPublishPlugin : Plugin<Project> {
     ) = project.run {
         tasks.getOrRegister("sourcesJar", Jar::class.java) {
             @Suppress("DEPRECATION")
-            classifier = "sources"
+            archiveClassifier.set("sources")
             val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching {
                 it.name.endsWith("main", ignoreCase = true)
             }
@@ -210,12 +210,12 @@ class MavenCentralPublishPlugin : Plugin<Project> {
 
         tasks.getOrRegister("javadocJar", Jar::class.java) {
             @Suppress("DEPRECATION")
-            classifier = "javadoc"
+            archiveClassifier.set("javadoc")
         }
 
         tasks.getOrRegister("samplessourcesJar", Jar::class.java) {
             @Suppress("DEPRECATION")
-            classifier = "samplessources"
+            archiveClassifier.set("samplessources")
             val sourceSets = (project.extensions.getByName("sourceSets") as SourceSetContainer).matching {
                 it.name.endsWith("test", ignoreCase = true)
             }

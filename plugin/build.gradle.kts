@@ -37,7 +37,7 @@ dependencies {
     compileOnly(gradleApi())
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:${rootProject.extra.get("serialization")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${rootProject.extra.get("serialization")}")
-    implementation("io.github.karlatemp:PublicationSign:1.3.40")
+    implementation("io.github.karlatemp:PublicationSign:1.3.41")
 
     testImplementation(gradleApi())
     testImplementation(localGroovy())
@@ -66,13 +66,9 @@ tasks.getByName("shadowJar", ShadowJar::class) {
 
 tasks.getByName("publishPlugins").dependsOn("shadowJar")
 
-pluginBundle {
+gradlePlugin {
     website = "https://github.com/Him188/maven-central-publish"
     vcsUrl = "https://github.com/Him188/maven-central-publish"
-    tags = listOf("maven", "publishing", "tools")
-}
-
-gradlePlugin {
     testSourceSets(sourceSets.test.get())
     plugins {
         create("MavenCentralPublish") {
@@ -80,6 +76,7 @@ gradlePlugin {
             displayName = "Maven Central Publish"
             description = project.description
             implementationClass = "me.him188.maven.central.publish.gradle.MavenCentralPublishPlugin"
+            tags = listOf("maven", "publishing", "tools")
         }
     }
 }
@@ -88,6 +85,6 @@ kotlin.target.compilations.all {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + "-Xjvm-default=all"
         freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
