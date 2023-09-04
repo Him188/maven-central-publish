@@ -13,7 +13,7 @@ abstract class AbstractPluginTest {
                 ?: error("Cannot find credentials.txt")
 
         val kotlinVersionForTests = "1.6.0"
-        val gradleVersionForTests = "7.2"
+        val gradleVersionForTests = "8.3"
 
         val supportingKotlinVersions = listOf(
             "1.4.31",
